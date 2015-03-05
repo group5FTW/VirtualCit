@@ -5,7 +5,7 @@
 
 
     <uses-sdk
-        android:minSdkVersion="15"
+        android:minSdkVersion="16"
         android:targetSdkVersion="21" />
 
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
@@ -26,7 +26,12 @@
 
         <activity
             android:name=".LaunchWebsite"
-            android:label="MyCIT"></activity>
+            android:label="MyCIT"
+            android:parentActivityName="com.example.liz.virtualcit.Model.HomePage">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.liz.virtualcit.Model.HomePage" />
+        </activity>
     </application>
 
 </manifest>

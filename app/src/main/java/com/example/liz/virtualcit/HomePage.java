@@ -25,7 +25,7 @@ public class HomePage extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
-
+        getActionBar().setDisplayHomeAsUpEnabled(true);
         listView = (ListView) findViewById(R.id.listView);
         showList(listView);
     }
