@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <!-- Search, should appear as action button -->
     <item
         android:id="@+id/image1"
         android:icon="@drawable/twitterbutton"
-        android:title="@string/Twitter" />
-    <!-- Settings, should always be in the overflow -->
+        android:title="@string/Twitter"
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/image2"
         android:icon="@drawable/facebookbutton"
-        android:title="@string/Facebook" />
-
-    <item
-        android:id="@+id/action_settings"
-        android:title="@string/action_settings" />
+        android:title="@string/Facebook"
+        app:showAsAction="ifRoom" />
 </menu>

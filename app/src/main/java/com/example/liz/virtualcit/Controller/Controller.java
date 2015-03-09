@@ -27,9 +27,13 @@ public class Controller {
         menuArray.add(mo);
         mo = new MenuObject("Student Email", "https://mail.google.com/mail/u/1/#inbox");
         menuArray.add(mo);
-
+        mo = new MenuObject("Students Union", "http://http://www.citsu.ie");
+        menuArray.add(mo);
+        mo = new MenuObject("Student Handbook", "http://www.mycit.ie/contentFiles/PDF/CITStudentServicesGuide14%20u.pdf");
+        menuArray.add(mo);
+        mo = new MenuObject("College Map", "http://www.mycit.ie/images/cit-map.jpg");
+        menuArray.add(mo);
         return menuArray;
-
     }
 
 

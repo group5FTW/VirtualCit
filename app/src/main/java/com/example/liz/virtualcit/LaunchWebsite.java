@@ -3,12 +3,13 @@ package com.example.liz.virtualcit;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-public class LaunchWebsite extends ActionBarActivity {
+public class LaunchWebsite extends HomePage {
     private String url;
     private WebView webview;
 
@@ -25,6 +26,12 @@ public class LaunchWebsite extends ActionBarActivity {
         WebSettings settings = webview.getSettings();
         settings.setJavaScriptEnabled(true);
         webview.loadUrl(url);
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_activity_actions, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override

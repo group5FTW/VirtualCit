@@ -1,9 +1,11 @@
 package com.example.liz.virtualcit;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,22 +22,28 @@ import java.util.ArrayList;
 public class HomePage extends ActionBarActivity {
     ArrayList<MenuObject> options = new ArrayList<MenuObject>();
     ListView listView;
+    int count = 0;
+    String user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        //getActionBar().setDisplayHomeAsUpEnabled(true);
         listView = (ListView) findViewById(R.id.listView);
-        showList(listView);
+        if (count == 0)//initializes first opening of the map
+        {
+            showList(listView);
+            count++;
+        }
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_home_page, menu);
-        return true;
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_activity_actions, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -44,10 +52,17 @@ public class HomePage extends ActionBarActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+        Intent i;
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        } else if (id == R.id.image1) {
+            i = new Intent(Intent.ACTION_VIEW, Uri.parse("http://twitter.com/CIT_ie?lang=en"));
+            startActivity(i);
+        } else if (id == R.id.image2) {
+            i = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.facebook.com/myCIT"));
+            startActivity(i);
         }
 
         return super.onOptionsItemSelected(item);
@@ -82,10 +97,17 @@ public class HomePage extends ActionBarActivity {
             }
         }
 
-        Intent intent = new Intent(this, LaunchWebsite.class);
-        intent.putExtra("name", temp.getName());
-        intent.putExtra("url", temp.getUrl());
-        startActivity(intent);
+        if (temp.getName() == "TimeTable" && user == "Student") {
+            Intent i = new Intent(this, TimeTableActivity.class);
+        } else {
+            Intent intent = new Intent(this, LaunchWebsite.class);
+            intent.putExtra("name", temp.getName());
+            intent.putExtra("url", temp.getUrl());
+            startActivity(intent);
+        }
+
+
+
     }
 
 }

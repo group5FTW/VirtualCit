@@ -6,7 +6,7 @@
     <string name="action_settings">Settings</string>
     <string name="Twitter">Twitter</string>
     <string name="Facebook">Facebook</string>
-    <color name="red">#D31245</color>
+    <color name="red">#A7133E</color>
     <color name="white">#FFFFFF</color>
 
 </resources>
