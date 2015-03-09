@@ -8,5 +8,6 @@
     <string name="Facebook">Facebook</string>
     <color name="red">#A7133E</color>
     <color name="white">#FFFFFF</color>
+    <string name="pref_prev_started"></string>
 
 </resources>

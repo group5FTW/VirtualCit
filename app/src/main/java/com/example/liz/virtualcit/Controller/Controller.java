@@ -16,7 +16,7 @@ public class Controller {
         return instance;
     }
 
-    public ArrayList loadOptions() {
+    private ArrayList loadOptions() {
         MenuObject mo = new MenuObject("MyCit", "http://www.mycit.ie");
         menuArray.add(mo);
         mo = new MenuObject("BlackBoard", "http://citbb.blackboard.com");

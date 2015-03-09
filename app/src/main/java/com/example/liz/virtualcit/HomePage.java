@@ -1,8 +1,10 @@
 package com.example.liz.virtualcit;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,6 +32,20 @@ public class HomePage extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
         //getActionBar().setDisplayHomeAsUpEnabled(true);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        boolean previouslyStarted = prefs.getBoolean(getString(R.string.pref_prev_started), false);
+        if (!previouslyStarted) {
+            SharedPreferences.Editor edit = prefs.edit();
+            edit.putBoolean(getString(R.string.pref_prev_started), Boolean.TRUE);
+            edit.commit();
+            showLogin();
+        }
+        Intent intentFromLogin = getIntent();
+        user = intentFromLogin.getStringExtra("user");
+
+
+
         listView = (ListView) findViewById(R.id.listView);
         if (count == 0)//initializes first opening of the map
         {
@@ -66,6 +82,11 @@ public class HomePage extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void showLogin() {
+        Intent i = new Intent(this, Login.class);
+        startActivity(i);
     }
 
     public void showList(ListView listView) {
@@ -109,5 +130,4 @@ public class HomePage extends ActionBarActivity {
 
 
     }
-
 }
