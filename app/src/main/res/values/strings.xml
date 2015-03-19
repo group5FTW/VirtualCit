@@ -4,8 +4,8 @@
     <string name="app_name">VirtualCit</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="Twitter">Twitter</string>
-    <string name="Facebook">Facebook</string>
+    <string name="Twitter">CIT Twitter Feed</string>
+    <string name="Facebook">CIT Facebook Page</string>
     <color name="red">#A7133E</color>
     <color name="white">#FFFFFF</color>
     <string name="pref_prev_started"></string>

@@ -20,41 +20,45 @@ import com.example.liz.virtualcit.Model.MenuObject;
 
 import java.util.ArrayList;
 
-
 public class HomePage extends ActionBarActivity {
-    ArrayList<MenuObject> options = new ArrayList<MenuObject>();
-    ListView listView;
-    int count = 0;
-    String user;
+    private ArrayList<MenuObject> options = new ArrayList<>();
+    private String user;
+    private String department;
+    private String course;
+    private int count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
-        //getActionBar().setDisplayHomeAsUpEnabled(true);
+
+        /*try
+        {
+            Controller.getInstance().localHostConnection(this);
+        }
+
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }*/
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         boolean previouslyStarted = prefs.getBoolean(getString(R.string.pref_prev_started), false);
+        ListView listView = (ListView) findViewById(R.id.listView);
+
         if (!previouslyStarted) {
             SharedPreferences.Editor edit = prefs.edit();
             edit.putBoolean(getString(R.string.pref_prev_started), Boolean.TRUE);
-            edit.commit();
+            edit.apply();
             showLogin();
         }
-        Intent intentFromLogin = getIntent();
-        user = intentFromLogin.getStringExtra("user");
 
-
-
-        listView = (ListView) findViewById(R.id.listView);
-        if (count == 0)//initializes first opening of the map
+        if (count == 0)
         {
             showList(listView);
             count++;
         }
     }
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -64,16 +68,10 @@ public class HomePage extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         Intent i;
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        } else if (id == R.id.image1) {
+        if (id == R.id.image1) {
             i = new Intent(Intent.ACTION_VIEW, Uri.parse("http://twitter.com/CIT_ie?lang=en"));
             startActivity(i);
         } else if (id == R.id.image2) {
@@ -87,19 +85,26 @@ public class HomePage extends ActionBarActivity {
     public void showLogin() {
         Intent i = new Intent(this, Login.class);
         startActivity(i);
+
+        Intent intentFromLogin = getIntent();
+        Controller.getInstance().setUser(intentFromLogin.getStringExtra("user"));
+        Controller.getInstance().setDepartment(intentFromLogin.getStringExtra("department"));
+        Controller.getInstance().setCourse(intentFromLogin.getStringExtra("course"));
     }
 
     public void showList(ListView listView) {
         options = Controller.getInstance().getMenu();
+        Controller.getInstance().notificationBuilder(this);
+
         try {
             ArrayAdapter<MenuObject> menuAdapter;
             menuAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, options);
-            this.listView.setAdapter(menuAdapter);
+            listView.setAdapter(menuAdapter);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        this.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 String menuOption = (String) ((TextView) view).getText();
@@ -118,16 +123,17 @@ public class HomePage extends ActionBarActivity {
             }
         }
 
-        if (temp.getName() == "TimeTable" && user == "Student") {
+        if (temp.getName() == "TimeTable" && (user == "Student")) {
             Intent i = new Intent(this, TimeTableActivity.class);
+            startActivity(i);
+        } else if ("Student Handbook" == temp.getName()) {
+            Intent pdf = new Intent(Intent.ACTION_VIEW);
+            startActivity(pdf);
         } else {
             Intent intent = new Intent(this, LaunchWebsite.class);
             intent.putExtra("name", temp.getName());
             intent.putExtra("url", temp.getUrl());
             startActivity(intent);
         }
-
-
-
     }
 }
