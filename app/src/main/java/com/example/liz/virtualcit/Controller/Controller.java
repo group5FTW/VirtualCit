@@ -1,5 +1,7 @@
 package com.example.liz.virtualcit.Controller;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
@@ -17,7 +19,7 @@ import java.util.Calendar;
 
 public class Controller {
     private static Controller instance;
-    private ArrayList<MenuObject> menuArray = new ArrayList();
+    private ArrayList<MenuObject> menuArray = new ArrayList<MenuObject>();
     public NotificationCompat.Builder notification;
     private String user;
     private String dep;
@@ -44,7 +46,7 @@ public class Controller {
         menuArray.add(mo);
         mo = new MenuObject("Students Union", "http://http://www.citsu.ie");
         menuArray.add(mo);
-        mo = new MenuObject("Student Handbook", "citssguide.pdf");
+        mo = new MenuObject("Student Handbook", "res\\raw\\citssguide.pdf");
         menuArray.add(mo);
         mo = new MenuObject("College Map", "http://www.mycit.ie/images/cit-map.jpg");
         menuArray.add(mo);
@@ -72,6 +74,24 @@ public class Controller {
         String date = df.format(Calendar.getInstance().getTime());
         String[] currentMinute = date.split(" ");
         //NotificationCompat.Builder notification = new NotificationCompat.Builder(this);
+
+        Handler mHandler = new Handler(Looper.getMainLooper());
+
+        /*Runnable mStatusChecker;
+        int UPDATE_INTERVAL = 2000;
+
+        mStatusChecker = new Runnable()
+        {
+            @Override
+            public void run()
+            {
+
+                //Run the passed runnable
+
+                // Re-run it after the update interval
+                mHandler.postDelayed(this, UPDATE_INTERVAL);
+            }
+        };*/
 
         String titleString = "The current minute is" + currentMinute[1];
         String userInfo = "User: " + user + "Dep:" + dep + "Course:" + course;
@@ -116,4 +136,6 @@ public class Controller {
     public void setCourse(String userCourse) {
         course = userCourse;
     }
+
+
 }
