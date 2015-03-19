@@ -147,11 +147,16 @@ public class HomePage extends ActionBarActivity {
         } else if (temp.getName() == "Go to F Block") {
             LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
             Location loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            String url = "https://www.google.ie/maps/dir/";
-            url += loc.toString() + "/";
-            url += temp.getUrl() + "";
+            String currentLongitude = String.valueOf(loc.getLongitude());
+            String currentLatitude = String.valueOf(loc.getLatitude());
+            String url = "http://www.google.ie/maps/dir/";
+            url += currentLatitude + "," + currentLongitude + "/";
+            url += temp.getUrl() + "/";
             Uri uri = Uri.parse(url);
             Intent maps = new Intent(Intent.ACTION_VIEW, uri);
+            Toast mapToast = Toast.makeText(this, url, Toast.LENGTH_LONG);
+            mapToast.show();
+            startActivity(maps);
         } else {
             Intent intent = new Intent(this, LaunchWebsite.class);
             intent.putExtra("name", temp.getName());
