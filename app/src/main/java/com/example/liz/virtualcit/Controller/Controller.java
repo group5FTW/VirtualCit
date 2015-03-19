@@ -50,6 +50,8 @@ public class Controller {
         menuArray.add(mo);
         mo = new MenuObject("College Map", "http://www.mycit.ie/images/cit-map.jpg");
         menuArray.add(mo);
+        mo = new MenuObject("Go to F Block", "51.8836091 -8.5356899");
+        menuArray.add(mo);
         return menuArray;
     }
 

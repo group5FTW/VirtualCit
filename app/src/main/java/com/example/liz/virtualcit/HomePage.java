@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -142,11 +144,22 @@ public class HomePage extends ActionBarActivity {
                 Toast error = Toast.makeText(this, "No pdf viewer available.", Toast.LENGTH_LONG);
                 error.show();
             }
+        } else if (temp.getName() == "Go to F Block") {
+            LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+            Location loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            String url = "https://www.google.ie/maps/dir/";
+            url += loc.toString() + "/";
+            url += temp.getUrl() + "";
+            Uri uri = Uri.parse(url);
+            Intent maps = new Intent(Intent.ACTION_VIEW, uri);
         } else {
             Intent intent = new Intent(this, LaunchWebsite.class);
             intent.putExtra("name", temp.getName());
             intent.putExtra("url", temp.getUrl());
             startActivity(intent);
+
         }
+
+
     }
 }
