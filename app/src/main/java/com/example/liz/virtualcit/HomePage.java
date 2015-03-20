@@ -128,7 +128,8 @@ public class HomePage extends ActionBarActivity {
             }
         }
 
-        if (temp.getName() == "TimeTable" && (Controller.getInstance().getUser() == "Student")) {
+        if (temp.getName() == "CIT TimeTables") {
+
             Intent i = new Intent(this, TimeTableActivity.class);
             startActivity(i);
         } else if ("Student Handbook" == temp.getName()) {

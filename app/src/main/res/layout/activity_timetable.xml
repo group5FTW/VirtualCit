@@ -2,18 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/red">
 
-    <Button
+    <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="add"
-        android:id="@+id/add" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="DELETE"
-        android:id="@+id/delete" />
+        android:id="@+id/list"
+        android:background="@color/white"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
 </LinearLayout>

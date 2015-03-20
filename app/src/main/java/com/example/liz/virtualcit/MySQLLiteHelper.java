@@ -8,7 +8,7 @@ import android.util.Log;
 public class MySQLLiteHelper extends SQLiteOpenHelper {
     //time table columns
     public static final String TABLENAME = "TimeTable";
-    public static final String CLASSNAME = "ClassName";
+    public static final String CLASSNAME = "Module";
     public static final String ROOMNAME = "RoomName";
     public static final String STARTTIME = "StartTime";
     public static final String DAY = "Day";
@@ -29,7 +29,7 @@ public class MySQLLiteHelper extends SQLiteOpenHelper {
             + " varchar(45) primary key, "
             + ROOMNAME + " varchar(45), "
             + STARTTIME + " varchar(45), "
-            + DAY + " integer not null);";
+            + DAY + " varchar(45) );";
 
     private static final String ROOMTABLE_CREATE = "CREATE TABLE IF NOT EXISTS "
             + ROOMTABLENAME + "(" + ROOMSNAME
@@ -56,6 +56,10 @@ public class MySQLLiteHelper extends SQLiteOpenHelper {
                         + newVersion + ", which will destroy all old data");
         db.execSQL("DROP TABLE IF EXISTS " + TIMETABLETABLE_CREATE);
         onCreate(db);
+    }
+
+    public void readEntry(String tableName) {
+
     }
 
 }

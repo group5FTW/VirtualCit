@@ -1,17 +1,46 @@
 package com.example.liz.virtualcit;
 
-import android.app.ListActivity;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.ArrayAdapter;
+import android.support.v7.app.ActionBarActivity;
 
-import com.example.liz.virtualcit.Model.TableEntry;
+import com.example.liz.virtualcit.Controller.Controller;
 
+import org.jsoup.Jsoup;
 
-public class TimeTableActivity extends ListActivity {
+public class TimeTableActivity extends ActionBarActivity {
+
+    String stringOfRooms = "IT1.2 F1.2 IT2.3 IT1.3 B219 B165";
+    String[] roomArray = stringOfRooms.split(" ");
+    public String[] roomsNumsToAdd = new String[100];
+    public String[] roomsNamesToAdd = new String[100];
+    String[] timesToAdd = new String[100];
+    int count = 0;
+    int countTime = 0;
+    String firstUrlPart = "http://timetables.cit.ie:70/reporting/Individual;Programme+Of+Study;name;";
+    String course = "CO.DCOM3+-+KSDEV_8_Y3";
+    String secondUrlPart = "%0D%0A?weeks=";
+    String semester1 = "4-16";
+    String semester2 = "24-31";
+    String thirdUrlPart = "&days=";
+    String days[] = {"1", "2", "3", "4", "5"};
+    String fourthUrlPart = "&periods=";
+    int periodsLow = 5;
+    String hyphen = "-";
+    int periodsHigh = 8;
+    String fifthUrlPart = "&height=100&width=100";
+
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_timetable);
+        for (int y = 0; y < 9; y++) {
+            String siteUrl = firstUrlPart + course + secondUrlPart + semester2 + thirdUrlPart + days[0] + fourthUrlPart + periodsLow + hyphen + periodsHigh + fifthUrlPart;
+            new ParseURL().execute(new String[]{siteUrl});
+            periodsLow += 4;
+            periodsHigh += 4;
+        }
+    }
         //setContentView(R.layout.activity_timetable);
 
 
@@ -23,12 +52,10 @@ public class TimeTableActivity extends ListActivity {
         //android.R.layout.simple_list_item_1, values);
         //setListAdapter(adapter);
 
-    }
-
-    public void onClick(View view) {
+    /*public void onClick(View view) {
         ArrayAdapter<TableEntry> adapter = (ArrayAdapter<TableEntry>) getListAdapter();
         adapter.notifyDataSetChanged();
-    }
+    }*/
 
     @Override
     protected void onResume() {
@@ -42,4 +69,50 @@ public class TimeTableActivity extends ListActivity {
         super.onPause();
     }
 
+    private class ParseURL extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            StringBuffer buffer = new StringBuffer();
+            String[] times = {"9:00 - 10:00", "10:00 - 11:00", "11:00 - 12:00", "12:00 - 1:00", "1:00 - 2:00", "2:00 - 3:00", "3:00 - 4:00", "4:00 - 5:00", "5:00 - 6:00"};
+
+            try {
+
+                org.jsoup.nodes.Document doc = Jsoup.connect(strings[0]).get();
+
+                String text = doc.body().text();
+                String[] parts = text.split("CO.DCOM3 ");
+                String newStringMinusStuff = parts[2];
+                String[] roomStuff = newStringMinusStuff.split(" ");
+
+
+                outerLoop:
+                for (int i = 0; i < roomStuff.length; i++) {
+                    innerLoop:
+                    for (int j = 0; j < roomArray.length; j++) {
+                        if (roomStuff[i].equalsIgnoreCase(roomArray[j])) {
+                            roomsNumsToAdd[count] = roomStuff[i];
+
+                            break outerLoop;
+                        }
+                    }
+
+                    buffer.append(roomStuff[i] + " ");
+
+                }
+
+                roomsNamesToAdd[count] = buffer.toString();
+                Controller.getInstance().populateTimeTable(roomsNamesToAdd[count], roomsNumsToAdd[count],
+                        times[countTime], days[0]);
+
+                countTime++;
+                count++;
+
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+
+            return buffer.toString();
+        }
+    }
 }

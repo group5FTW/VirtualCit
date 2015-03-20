@@ -12,7 +12,6 @@ import com.example.liz.virtualcit.Model.MenuObject;
 import com.example.liz.virtualcit.Model.TableEntry;
 import com.example.liz.virtualcit.MySQLLiteHelper;
 import com.example.liz.virtualcit.R;
-import com.example.liz.virtualcit.TimeTableActivity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -145,6 +144,7 @@ public class Controller {
         return dep;
     }
 
+
     public void setDepartment(String department) {
         dep = department;
     }
@@ -214,11 +214,24 @@ public class Controller {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Toast dbtoast = Toast.makeText(homePage, "Room database built", Toast.LENGTH_LONG);
+        Toast dbtoast = Toast.makeText(homePage, "Room Database Populated", Toast.LENGTH_LONG);
         dbtoast.show();
     }
 
-    public void populateTimeTable(TimeTableActivity tta) {
-        String insertStatement = "INSERT INTO TimeTable(Module,Room,StartTime,Day) VALUES(";
+    public void populateTimeTable(String module, String room, String time, String day) {
+        String insertStatement = "INSERT INTO " +
+                dbHelper.TABLENAME + "(" +
+                dbHelper.CLASSNAME + "," +
+                dbHelper.ROOMNAME + "," +
+                dbHelper.STARTTIME + "," +
+                dbHelper.DAY + ") VALUES("
+                + "'" + module + "',"
+                + "'" + room + "',"
+                + "'" + time + "',"
+                + "'" + day + "');";
+
+        System.out.println(insertStatement);
+
+        sqldb.execSQL(insertStatement);
     }
 }
