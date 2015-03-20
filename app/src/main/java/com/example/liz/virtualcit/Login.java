@@ -14,6 +14,7 @@ public class Login extends ActionBarActivity {
     private String userType;
     private String department;
     private String course;
+    private String semester;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,6 +29,7 @@ public class Login extends ActionBarActivity {
         i.putExtra("user", userType);
         i.putExtra("department", department);
         i.putExtra("course", course);
+        i.putExtra("semester", semester);
         startActivity(i);
     }
 
@@ -59,21 +61,27 @@ public class Login extends ActionBarActivity {
 
 
     public void setSpinnerAdapters() {
-        String[] departmentChoice = new String[]{"Computing", "Accounting", "Snowboarding"};
-        String[] courseChoice = new String[]{"CO.DCOM3", "Numbers and Stuff", "Narley Things Yo"};
-        Spinner departmentSpinner = (Spinner) findViewById(R.id.spinner);
-        Spinner courseSpinner = (Spinner) findViewById(R.id.spinner2);
+        String[] departmentChoice = {"Computing", "Accounting", "Snowboarding"};
+        String[] courseChoice = {"CO.DCOM3", "Numbers and Stuff", "Narley Things Yo"};
+        String[] semesterChoice = {"Semester 1", "Semester 2"};
+        Spinner departmentSpinner = (Spinner) findViewById(R.id.depSpinner);
+        Spinner courseSpinner = (Spinner) findViewById(R.id.courseSpinner);
+        Spinner semesterSpinner = (Spinner) findViewById(R.id.semesterSpinner);
         Button submit = (Button) findViewById(R.id.button);
         ArrayAdapter<String> adapter1 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, departmentChoice);
         ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, courseChoice);
+        ArrayAdapter<String> adapter3 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, semesterChoice);
         adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter3.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         departmentSpinner.setAdapter(adapter1);
         courseSpinner.setAdapter(adapter2);
+        semesterSpinner.setAdapter(adapter3);
 
         department = departmentSpinner.getSelectedItem().toString();
         course = courseSpinner.getSelectedItem().toString();
+        semester = semesterSpinner.getSelectedItem().toString();
 
         submit.setOnClickListener(new View.OnClickListener() {
             @Override

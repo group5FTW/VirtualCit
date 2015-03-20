@@ -1,5 +1,7 @@
 package com.example.liz.virtualcit.Controller;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
@@ -7,15 +9,22 @@ import android.widget.Toast;
 
 import com.example.liz.virtualcit.HomePage;
 import com.example.liz.virtualcit.Model.MenuObject;
+import com.example.liz.virtualcit.Model.TableEntry;
+import com.example.liz.virtualcit.MySQLLiteHelper;
 import com.example.liz.virtualcit.R;
+import com.example.liz.virtualcit.TimeTableActivity;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class Controller {
     private static Controller instance;
@@ -24,12 +33,16 @@ public class Controller {
     private String user;
     private String dep;
     private String course;
+    private String semester;
+    public SQLiteDatabase sqldb;
+    private MySQLLiteHelper dbHelper;
+    private String[] allColumns = {MySQLLiteHelper.CLASSNAME,
+            MySQLLiteHelper.ROOMNAME, MySQLLiteHelper.STARTTIME, MySQLLiteHelper.DAY};
 
     public static Controller getInstance() {
         if (instance == null) {
             instance = new Controller();
         }
-
         return instance;
     }
 
@@ -59,6 +72,11 @@ public class Controller {
     public ArrayList getMenu() {
         menuArray = loadOptions();
         return menuArray;
+    }
+
+    public void databaseConnection(HomePage homePage) {
+        dbHelper = new MySQLLiteHelper(homePage);
+        sqldb = dbHelper.getWritableDatabase();
     }
 
     public void localHostConnection(HomePage homePage) throws IOException {
@@ -139,5 +157,68 @@ public class Controller {
         course = userCourse;
     }
 
+    public String getSemester() {
+        return semester;
+    }
 
+    public void setSemester(String semesterChoice) {
+        semester = semesterChoice;
+    }
+
+    public List<TableEntry> getAllTableEntrys() {
+        List<TableEntry> tableEntries = new ArrayList<TableEntry>();
+
+        Cursor cursor = sqldb.query(MySQLLiteHelper.TABLENAME,
+                allColumns, null, null, null, null, null);
+
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            TableEntry tableEntry = cursorToTableEntry(cursor);
+            tableEntries.add(tableEntry);
+            cursor.moveToNext();
+        }
+        // make sure to close the cursor
+        cursor.close();
+        return tableEntries;
+    }
+
+    private TableEntry cursorToTableEntry(Cursor cursor) {
+        TableEntry tableEntry = new TableEntry();
+        tableEntry.setModule(cursor.getString(0));
+        tableEntry.setRoomName(cursor.getString(1));
+        tableEntry.setStartTime(cursor.getString(2));
+        tableEntry.setDay(cursor.getInt(4));
+        return tableEntry;
+    }
+
+    public void populateRoomTable(HomePage homePage) {
+        InputStream inputStream = homePage.getResources().openRawResource(R.raw.roominfo);
+        try {
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader br = new BufferedReader(inputStreamReader);
+
+            String currentLine;
+
+            while ((currentLine = br.readLine()) != null) {
+                String[] split = currentLine.split("#");
+                String insert = "INSERT INTO " +
+                        dbHelper.ROOMTABLENAME + "(" +
+                        dbHelper.ROOMSNAME + "," +
+                        dbHelper.LONGITUDE + "," +
+                        dbHelper.LATITUDE + ")" + " VALUES("
+                        + split[0] + "," + split[1] + "," + split[2] + ")";
+
+                sqldb.execSQL(insert);
+            }
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Toast dbtoast = Toast.makeText(homePage, "Room database built", Toast.LENGTH_LONG);
+        dbtoast.show();
+    }
+
+    public void populateTimeTable(TimeTableActivity tta) {
+        String insertStatement = "INSERT INTO TimeTable(Module,Room,StartTime,Day) VALUES(";
+    }
 }

@@ -6,19 +6,36 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public class MySQLLiteHelper extends SQLiteOpenHelper {
+    //time table columns
+    public static final String TABLENAME = "TimeTable";
+    public static final String CLASSNAME = "ClassName";
+    public static final String ROOMNAME = "RoomName";
+    public static final String STARTTIME = "StartTime";
+    public static final String DAY = "Day";
 
-    public static final String TABLE_COMMENTS = "comments";
-    public static final String COLUMN_ID = "_id";
-    public static final String COLUMN_COMMENT = "comment";
+    //room table comments
+    public static final String ROOMTABLENAME = "RoomTable";
+    public static final String ROOMSNAME = "Name";
+    public static final String LONGITUDE = "Longitude";
+    public static final String LATITUDE = "Latitude";
 
-    private static final String DATABASE_NAME = "timetable.db";
+
+    private static final String DATABASE_NAME = "virtualCit.db";
     private static final int DATABASE_VERSION = 1;
 
     // Database creation sql statement
-    private static final String DATABASE_CREATE = "create table "
-            + TABLE_COMMENTS + "(" + COLUMN_ID
-            + " integer primary key autoincrement, " + COLUMN_COMMENT
-            + " text not null);";
+    private static final String TIMETABLETABLE_CREATE = "CREATE TABLE IF NOT EXISTS "
+            + TABLENAME + "(" + CLASSNAME
+            + " varchar(45) primary key, "
+            + ROOMNAME + " varchar(45), "
+            + STARTTIME + " varchar(45), "
+            + DAY + " integer not null);";
+
+    private static final String ROOMTABLE_CREATE = "CREATE TABLE IF NOT EXISTS "
+            + ROOMTABLENAME + "(" + ROOMSNAME
+            + " text, "
+            + LONGITUDE + " integer not null, "
+            + LATITUDE + " integer not null);";
 
     public MySQLLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -26,7 +43,10 @@ public class MySQLLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase database) {
-        database.execSQL(DATABASE_CREATE);
+        System.out.println(TIMETABLETABLE_CREATE);
+        database.execSQL(TIMETABLETABLE_CREATE);
+        System.out.println(ROOMTABLE_CREATE);
+        database.execSQL(ROOMTABLE_CREATE);
     }
 
     @Override
@@ -34,7 +54,7 @@ public class MySQLLiteHelper extends SQLiteOpenHelper {
         Log.w(MySQLLiteHelper.class.getName(),
                 "Upgrading database from version " + oldVersion + " to "
                         + newVersion + ", which will destroy all old data");
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_COMMENTS);
+        db.execSQL("DROP TABLE IF EXISTS " + TIMETABLETABLE_CREATE);
         onCreate(db);
     }
 

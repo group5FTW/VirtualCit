@@ -50,6 +50,8 @@ public class HomePage extends ActionBarActivity {
         ListView listView = (ListView) findViewById(R.id.listView);
 
         if (!previouslyStarted) {
+            Controller.getInstance().databaseConnection(this);
+            Controller.getInstance().populateRoomTable(this);
             SharedPreferences.Editor edit = prefs.edit();
             edit.putBoolean(getString(R.string.pref_prev_started), Boolean.TRUE);
             edit.apply();
@@ -93,6 +95,7 @@ public class HomePage extends ActionBarActivity {
         Controller.getInstance().setUser(intentFromLogin.getStringExtra("user"));
         Controller.getInstance().setDepartment(intentFromLogin.getStringExtra("department"));
         Controller.getInstance().setCourse(intentFromLogin.getStringExtra("course"));
+        Controller.getInstance().setSemester(intentFromLogin.getStringExtra("semester"));
     }
 
     public void showList(ListView listView) {
@@ -115,7 +118,6 @@ public class HomePage extends ActionBarActivity {
             }
         });
     }
-
 
     public void optionChoice(String menuOption) {
         MenuObject temp = new MenuObject();
@@ -144,7 +146,7 @@ public class HomePage extends ActionBarActivity {
                 Toast error = Toast.makeText(this, "No pdf viewer available.", Toast.LENGTH_LONG);
                 error.show();
             }
-        } else if (temp.getName() == "Go to F Block") {
+        } else if (temp.getName() == "Go to F1.6 Block") {
             LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
             Location loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             String currentLongitude = String.valueOf(loc.getLongitude());
@@ -162,9 +164,6 @@ public class HomePage extends ActionBarActivity {
             intent.putExtra("name", temp.getName());
             intent.putExtra("url", temp.getUrl());
             startActivity(intent);
-
         }
-
-
     }
 }
