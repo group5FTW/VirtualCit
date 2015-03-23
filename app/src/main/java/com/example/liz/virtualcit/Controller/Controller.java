@@ -2,12 +2,11 @@ package com.example.liz.virtualcit.Controller;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.example.liz.virtualcit.HomePage;
+import com.example.liz.virtualcit.Model.LectureRoom;
 import com.example.liz.virtualcit.Model.MenuObject;
 import com.example.liz.virtualcit.Model.TableEntry;
 import com.example.liz.virtualcit.MySQLLiteHelper;
@@ -93,9 +92,14 @@ public class Controller {
         DateFormat df = new SimpleDateFormat("H mm");
         String date = df.format(Calendar.getInstance().getTime());
         String[] currentMinute = date.split(" ");
+
+        int[] days = {1, 2, 3, 4, 5};
+
+
+
         //NotificationCompat.Builder notification = new NotificationCompat.Builder(this);
 
-        Handler mHandler = new Handler(Looper.getMainLooper());
+        //Handler mHandler = new Handler(Looper.getMainLooper());
 
         /*Runnable mStatusChecker;
         int UPDATE_INTERVAL = 2000;
@@ -145,7 +149,6 @@ public class Controller {
         return dep;
     }
 
-
     public void setDepartment(String department) {
         dep = department;
     }
@@ -191,7 +194,32 @@ public class Controller {
         return te;
     }
 
+    public ArrayList<LectureRoom> getAllRooms() {
+        ArrayList<LectureRoom> roomList = new ArrayList<LectureRoom>();
+        sqldb = dbHelper.getReadableDatabase();
+        Cursor cursor = sqldb.query(dbHelper.ROOMTABLENAME,
+                roomTableAllColumns, null, null, null, null, null);
+
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            LectureRoom lr = cursorToRoomEntry(cursor);
+            roomList.add(lr);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return roomList;
+    }
+
+    public LectureRoom cursorToRoomEntry(Cursor cursor) {
+        LectureRoom lr = new LectureRoom();
+        lr.setRoomName(cursor.getString(0));
+        lr.setGpsLongitude(cursor.getInt(1));
+        lr.setGpsLatitude(cursor.getInt(2));
+        return lr;
+    }
+
     public void populateRoomTable(HomePage homePage) {
+        sqldb = dbHelper.getWritableDatabase();
         InputStream inputStream = homePage.getResources().openRawResource(R.raw.roominfo);
         try {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -216,9 +244,11 @@ public class Controller {
         }
         Toast dbtoast = Toast.makeText(homePage, "Room Database Populated", Toast.LENGTH_LONG);
         dbtoast.show();
+        sqldb.close();
     }
 
     public void populateTimeTable(String module, String room, String time, String day) {
+        sqldb = dbHelper.getWritableDatabase();
         String insertStatement = "INSERT INTO " +
                 dbHelper.TABLENAME + "(" +
                 dbHelper.CLASSNAME + "," +
