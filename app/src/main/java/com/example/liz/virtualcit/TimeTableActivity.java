@@ -3,13 +3,17 @@ package com.example.liz.virtualcit;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import com.example.liz.virtualcit.Controller.Controller;
+import com.example.liz.virtualcit.Model.TableEntry;
 
 import org.jsoup.Jsoup;
 
-public class TimeTableActivity extends ActionBarActivity {
+import java.util.ArrayList;
 
+public class TimeTableActivity extends ActionBarActivity {
     String stringOfRooms = "IT1.2 F1.2 IT2.3 IT1.3 B219 B165";
     String[] roomArray = stringOfRooms.split(" ");
     public String[] roomsNumsToAdd = new String[100];
@@ -29,44 +33,24 @@ public class TimeTableActivity extends ActionBarActivity {
     String hyphen = "-";
     int periodsHigh = 8;
     String fifthUrlPart = "&height=100&width=100";
+    ListView lv;
 
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timetable);
+        lv = (ListView) findViewById(R.id.timeTableList);
         for (int y = 0; y < 9; y++) {
             String siteUrl = firstUrlPart + course + secondUrlPart + semester2 + thirdUrlPart + days[0] + fourthUrlPart + periodsLow + hyphen + periodsHigh + fifthUrlPart;
             new ParseURL().execute(new String[]{siteUrl});
             periodsLow += 4;
             periodsHigh += 4;
         }
-    }
-        //setContentView(R.layout.activity_timetable);
 
-
-        //List<TableEntry> values = datasource.getAllTableEntrys();
-
-        // use the SimpleCursorAdapter to show the
-        // elements in a ListView
-        //ArrayAdapter<TableEntry> adapter = new ArrayAdapter<TableEntry>(this,
-        //android.R.layout.simple_list_item_1, values);
-        //setListAdapter(adapter);
-
-    /*public void onClick(View view) {
-        ArrayAdapter<TableEntry> adapter = (ArrayAdapter<TableEntry>) getListAdapter();
-        adapter.notifyDataSetChanged();
-    }*/
-
-    @Override
-    protected void onResume() {
-        //datasource.open();
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        //datasource.close();
-        super.onPause();
+        ArrayList<TableEntry> values = Controller.getInstance().getAllTimeTableEntrys();
+        ArrayAdapter<TableEntry> adapter = new ArrayAdapter<TableEntry>(this,
+                android.R.layout.simple_list_item_1, values);
+        lv.setAdapter(adapter);
     }
 
     private class ParseURL extends AsyncTask<String, Void, String> {

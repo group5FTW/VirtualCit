@@ -7,23 +7,6 @@ public class LectureRoom {
     private int gpsLongitude;
     private int gpsLatitude;
 
-
-    public LectureRoom(String name, String level, int longitude, int latitude) {
-        roomName = name;
-        floorLevel = level;
-        gpsLongitude = longitude;
-        gpsLatitude = latitude;
-
-    }
-
-    public String getFloorLevel() {
-        return floorLevel;
-    }
-
-    public void setFloorLevel(String floorLevel) {
-        this.floorLevel = floorLevel;
-    }
-
     public String getRoomName() {
         return roomName;
     }
@@ -38,5 +21,13 @@ public class LectureRoom {
 
     public void setGpsLongitude(int gpsLongitude) {
         this.gpsLongitude = gpsLongitude;
+    }
+
+    public int getGpsLatitude() {
+        return gpsLatitude;
+    }
+
+    public void setGpsLatitude(int gpsLatitude) {
+        this.gpsLatitude = gpsLatitude;
     }
 }

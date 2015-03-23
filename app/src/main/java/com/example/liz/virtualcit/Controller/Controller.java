@@ -23,11 +23,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 public class Controller {
     private static Controller instance;
-    private ArrayList<MenuObject> menuArray = new ArrayList<MenuObject>();
+    private ArrayList menuArray = new ArrayList();
     public NotificationCompat.Builder notification;
     private String user;
     private String dep;
@@ -35,8 +34,9 @@ public class Controller {
     private String semester;
     public SQLiteDatabase sqldb;
     private MySQLLiteHelper dbHelper;
-    private String[] allColumns = {MySQLLiteHelper.CLASSNAME,
-            MySQLLiteHelper.ROOMNAME, MySQLLiteHelper.STARTTIME, MySQLLiteHelper.DAY};
+    private String[] timeTableAllColumns = {dbHelper.CLASSNAME,
+            dbHelper.ROOMNAME, dbHelper.STARTTIME, dbHelper.DAY};
+    private String[] roomTableAllColumns = {dbHelper.ROOMSNAME, dbHelper.LONGITUDE, dbHelper.LATITUDE};
 
     public static Controller getInstance() {
         if (instance == null) {
@@ -58,7 +58,7 @@ public class Controller {
         menuArray.add(mo);
         mo = new MenuObject("Students Union", "http://http://www.citsu.ie");
         menuArray.add(mo);
-        mo = new MenuObject("Student Handbook", "res\\raw\\citssguide.pdf");
+        mo = new MenuObject("Student Handbook", "https://docs.google.com/gview?url=http://www.mycit.ie/contentFiles/PDF/CIT-Sports.pdf");
         menuArray.add(mo);
         mo = new MenuObject("College Map", "http://www.mycit.ie/images/cit-map.jpg");
         menuArray.add(mo);
@@ -76,6 +76,7 @@ public class Controller {
     public void databaseConnection(HomePage homePage) {
         dbHelper = new MySQLLiteHelper(homePage);
         sqldb = dbHelper.getWritableDatabase();
+        sqldb.close();
     }
 
     public void localHostConnection(HomePage homePage) throws IOException {
@@ -165,30 +166,29 @@ public class Controller {
         semester = semesterChoice;
     }
 
-    public List<TableEntry> getAllTableEntrys() {
-        List<TableEntry> tableEntries = new ArrayList<TableEntry>();
-
-        Cursor cursor = sqldb.query(MySQLLiteHelper.TABLENAME,
-                allColumns, null, null, null, null, null);
+    public ArrayList<TableEntry> getAllTimeTableEntrys() {
+        ArrayList<TableEntry> tableEntries = new ArrayList<TableEntry>();
+        sqldb = dbHelper.getReadableDatabase();
+        Cursor cursor = sqldb.query(dbHelper.TABLENAME,
+                timeTableAllColumns, null, null, null, null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            TableEntry tableEntry = cursorToTableEntry(cursor);
-            tableEntries.add(tableEntry);
+            TableEntry te = cursorToTableEntry(cursor);
+            tableEntries.add(te);
             cursor.moveToNext();
         }
-        // make sure to close the cursor
         cursor.close();
         return tableEntries;
     }
 
     private TableEntry cursorToTableEntry(Cursor cursor) {
-        TableEntry tableEntry = new TableEntry();
-        tableEntry.setModule(cursor.getString(0));
-        tableEntry.setRoomName(cursor.getString(1));
-        tableEntry.setStartTime(cursor.getString(2));
-        tableEntry.setDay(cursor.getInt(4));
-        return tableEntry;
+        TableEntry te = new TableEntry();
+        te.setModule(cursor.getString(0));
+        te.setRoomName(cursor.getString(1));
+        te.setStartTime(cursor.getString(2));
+        te.setDay(cursor.getInt(3));
+        return te;
     }
 
     public void populateRoomTable(HomePage homePage) {

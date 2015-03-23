@@ -2,8 +2,6 @@ package com.example.liz.virtualcit;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -24,7 +22,6 @@ import com.example.liz.virtualcit.Controller.Controller;
 import com.example.liz.virtualcit.Model.MenuObject;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class HomePage extends ActionBarActivity {
     private ArrayList<MenuObject> options = new ArrayList<>();
@@ -34,6 +31,7 @@ public class HomePage extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
+        Controller.getInstance().databaseConnection(this);
 
         /*try
         {
@@ -50,7 +48,7 @@ public class HomePage extends ActionBarActivity {
         ListView listView = (ListView) findViewById(R.id.listView);
 
         if (!previouslyStarted) {
-            Controller.getInstance().databaseConnection(this);
+
             Controller.getInstance().populateRoomTable(this);
             SharedPreferences.Editor edit = prefs.edit();
             edit.putBoolean(getString(R.string.pref_prev_started), Boolean.TRUE);
@@ -132,21 +130,6 @@ public class HomePage extends ActionBarActivity {
 
             Intent i = new Intent(this, TimeTableActivity.class);
             startActivity(i);
-        } else if ("Student Handbook" == temp.getName()) {
-            Intent pdf = new Intent(Intent.ACTION_VIEW,
-                    Uri.parse(temp.getUrl()));
-            pdf.setType("application/pdf");
-
-            PackageManager pm = getPackageManager();
-
-            List<ResolveInfo> activities = pm.queryIntentActivities(pdf, 0);
-
-            if (activities.size() > 0) {
-                startActivity(pdf);
-            } else {
-                Toast error = Toast.makeText(this, "No pdf viewer available.", Toast.LENGTH_LONG);
-                error.show();
-            }
         } else if (temp.getName() == "Go to F1.6 Block") {
             LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
             Location loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
