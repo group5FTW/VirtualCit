@@ -58,7 +58,7 @@ public class TimeTableGeneration {
         @Override
         protected String doInBackground(String... strings) {
             StringBuffer buffer = new StringBuffer();
-            String[] times = {"9:00 - 10:00", "10:00 - 11:00", "11:00 - 12:00", "12:00 - 1:00", "1:00 - 2:00", "2:00 - 3:00", "3:00 - 4:00", "4:00 - 5:00", "5:00 - 6:00"};
+            String[] times = {"9:00", "10:00", "11:00", "12:00", "1:00", "2:00", "3:00", "4:00", "5:00"};
             int[] periods = {5, 9, 13, 17, 21, 25, 29, 33, 37};
             mainLoop:
             for (int y = 0; y < 9; y++) {

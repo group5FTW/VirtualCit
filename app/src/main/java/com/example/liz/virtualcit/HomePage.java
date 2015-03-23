@@ -55,15 +55,14 @@ public class HomePage extends ActionBarActivity {
             edit.putBoolean(getString(R.string.pref_prev_started), Boolean.TRUE);
             edit.apply();
             showLogin();
-
         }
 
-        if (count == 0)
-        {
+        if (count == 0) {
             showList(listView);
             count++;
         }
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -104,7 +103,6 @@ public class HomePage extends ActionBarActivity {
                     intentFromLogin.getStringExtra("semester"));
             System.out.println("Semester: " + intentFromLogin.getStringExtra("semester"));
         }
-
     }
 
     public void showList(ListView listView) {

@@ -22,6 +22,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Controller {
     private static Controller instance;
@@ -88,44 +90,52 @@ public class Controller {
         urlConnection.disconnect();
     }
 
-    public void notificationBuilder(HomePage homePage) {
-        DateFormat df = new SimpleDateFormat("H mm");
-        String date = df.format(Calendar.getInstance().getTime());
-        String[] currentMinute = date.split(" ");
+    public void notificationBuilder(final HomePage homePage) {
+        final DateFormat[] df = new DateFormat[1];
+        final String[] date = new String[1];
+
+        Timer timer = new Timer();
+        TimerTask timeCheck = new TimerTask() {
+            @Override
+            public void run() {
+                df[0] = new SimpleDateFormat("mm H EEEE");
+                date[0] = df[0].format(Calendar.getInstance().getTime());
+                String[] currentMinute = date[0].split(" ");
+
+                int tempNum;
+                if (Integer.parseInt(currentMinute[0]) < 50) {
+                    tempNum = Integer.parseInt(currentMinute[0] + 10);
+                } else tempNum = Integer.parseInt(currentMinute[0]);
+                String nextClassCheck = tempNum + ":00";
+
+                if ((tempNum > 50) && (tempNum < 59)) {
+                    sqldb = dbHelper.getReadableDatabase();
+                    Cursor cursor = sqldb.query("TimeTable", new String[]{"StartTime", "Day"},
+                            "StartTime = " + "'" + String.valueOf(nextClassCheck) + "' AND " +
+                                    "", null, null, null, null);
+                    System.out.println(cursor.getString(0));
+                }
+
+
+                NotificationCompat.Builder notification = new NotificationCompat.Builder(homePage);
+                String titleString = "Your next class is ";
+
+            }
+        };
+
 
         int[] days = {1, 2, 3, 4, 5};
 
 
-
-        //NotificationCompat.Builder notification = new NotificationCompat.Builder(this);
-
-        //Handler mHandler = new Handler(Looper.getMainLooper());
-
-        /*Runnable mStatusChecker;
-        int UPDATE_INTERVAL = 2000;
-
-        mStatusChecker = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-
-                //Run the passed runnable
-
-                // Re-run it after the update interval
-                mHandler.postDelayed(this, UPDATE_INTERVAL);
-            }
-        };*/
-
-        String titleString = "The current minute is" + currentMinute[1];
+//        String titleString = "The current minute is" + currentMinute[1];
         String userInfo = "User: " + user + "Dep:" + dep + "Course:" + course;
         //Toast toast = Toast.makeText(HomePage.this, titleString, Toast.LENGTH_LONG);
         //toast.show();
 
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(homePage)
-                .setSmallIcon(R.drawable.notification_icon)
-                .setContentTitle(titleString)
-                .setContentText(userInfo);
+        //NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(homePage)
+        // .setSmallIcon(R.drawable.notification_icon)
+        //.setContentTitle(titleString)
+        //.setContentText(userInfo);
         /*Intent resultIntent = new Intent(this, TimeTableActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(HomePage.class);
