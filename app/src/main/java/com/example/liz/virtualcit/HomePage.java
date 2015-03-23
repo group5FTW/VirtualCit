@@ -24,6 +24,7 @@ import com.example.liz.virtualcit.Model.MenuObject;
 import java.util.ArrayList;
 
 public class HomePage extends ActionBarActivity {
+    private static final int CHILD_ACTIVITY_CODE = 1234;
     private ArrayList<MenuObject> options = new ArrayList<>();
     private int count = 0;
 
@@ -54,6 +55,7 @@ public class HomePage extends ActionBarActivity {
             edit.putBoolean(getString(R.string.pref_prev_started), Boolean.TRUE);
             edit.apply();
             showLogin();
+
         }
 
         if (count == 0)
@@ -87,13 +89,22 @@ public class HomePage extends ActionBarActivity {
 
     public void showLogin() {
         Intent i = new Intent(this, Login.class);
-        startActivity(i);
+        startActivityForResult(i, CHILD_ACTIVITY_CODE);
+    }
 
-        Intent intentFromLogin = getIntent();
-        Controller.getInstance().setUser(intentFromLogin.getStringExtra("user"));
-        Controller.getInstance().setDepartment(intentFromLogin.getStringExtra("department"));
-        Controller.getInstance().setCourse(intentFromLogin.getStringExtra("course"));
-        Controller.getInstance().setSemester(intentFromLogin.getStringExtra("semester"));
+    protected void onActivityResult(int requestCode, int resultCode, Intent intentFromLogin) {
+        if (requestCode == CHILD_ACTIVITY_CODE && resultCode == RESULT_OK) {
+            Controller.getInstance().setUser(intentFromLogin.getStringExtra("user"));
+            Controller.getInstance().setDepartment(intentFromLogin.getStringExtra("department"));
+            Controller.getInstance().setCourse(intentFromLogin.getStringExtra("course"));
+            Controller.getInstance().setSemester(intentFromLogin.getStringExtra("semester"));
+
+            TimeTableGeneration ttg = new TimeTableGeneration(this,
+                    intentFromLogin.getStringExtra("course"),
+                    intentFromLogin.getStringExtra("semester"));
+            System.out.println("Semester: " + intentFromLogin.getStringExtra("semester"));
+        }
+
     }
 
     public void showList(ListView listView) {

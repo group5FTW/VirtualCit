@@ -46,8 +46,8 @@ public class TableEntry {
 
     @Override
     public String toString() {
-        return module + " " + roomName + ""
-                + startTime + "" + getDayName();
+        return startTime + " " + getDayName() + " " + roomName + " "
+                + module;
     }
 }
 

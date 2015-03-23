@@ -26,11 +26,16 @@ public class Login extends ActionBarActivity {
     public void launchHomePage()//creates home page intent
     {
         Intent i = new Intent(this, HomePage.class);
+        System.out.println(userType);
+        System.out.println(department);
+        System.out.println(course);
+        System.out.println(semester);
         i.putExtra("user", userType);
         i.putExtra("department", department);
         i.putExtra("course", course);
         i.putExtra("semester", semester);
-        startActivity(i);
+        setResult(RESULT_OK, i);
+        finish();
     }
 
     public void userAlert()//alert method
@@ -62,7 +67,7 @@ public class Login extends ActionBarActivity {
 
     public void setSpinnerAdapters() {
         String[] departmentChoice = {"Computing", "Accounting", "Snowboarding"};
-        String[] courseChoice = {"CO.DCOM3", "Numbers and Stuff", "Narley Things Yo"};
+        String[] courseChoice = {"CO.DCOM3+-+KSDEV_8_Y3", "Numbers and Stuff", "Narley Things Yo"};
         String[] semesterChoice = {"Semester 1", "Semester 2"};
         Spinner departmentSpinner = (Spinner) findViewById(R.id.depSpinner);
         Spinner courseSpinner = (Spinner) findViewById(R.id.courseSpinner);
