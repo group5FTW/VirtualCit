@@ -16,14 +16,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class Controller {
     private static Controller instance;
@@ -35,9 +28,9 @@ public class Controller {
     private String semester;
     public SQLiteDatabase sqldb;
     private MySQLLiteHelper dbHelper;
-    private String[] timeTableAllColumns = {dbHelper.CLASSNAME,
-            dbHelper.ROOMNAME, dbHelper.STARTTIME, dbHelper.DAY};
-    private String[] roomTableAllColumns = {dbHelper.ROOMSNAME, dbHelper.LONGITUDE, dbHelper.LATITUDE};
+    private String[] timeTableAllColumns = {MySQLLiteHelper.CLASSNAME,
+            MySQLLiteHelper.ROOMNAME, MySQLLiteHelper.STARTTIME, MySQLLiteHelper.DAY};
+    private String[] roomTableAllColumns = {MySQLLiteHelper.ROOMSNAME, MySQLLiteHelper.LONGITUDE, MySQLLiteHelper.LATITUDE};
 
     public static Controller getInstance() {
         if (instance == null) {
@@ -63,7 +56,7 @@ public class Controller {
         menuArray.add(mo);
         mo = new MenuObject("College Map", "http://www.mycit.ie/images/cit-map.jpg");
         menuArray.add(mo);
-        mo = new MenuObject("Go to F Block", "51.8836091+-8.5356899");
+        mo = new MenuObject("Locate Room", "Locates the room");
         menuArray.add(mo);
         return menuArray;
     }
@@ -80,7 +73,7 @@ public class Controller {
         sqldb.close();
     }
 
-    public void localHostConnection(HomePage homePage) throws IOException {
+    /*public void localHostConnection(HomePage homePage) throws IOException {
         URL url = new URL("http://localhost:8080/");
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         Toast toast = Toast.makeText(homePage, "Connection set", Toast.LENGTH_LONG);
@@ -88,91 +81,18 @@ public class Controller {
 
         System.out.println("Connection opened");
         urlConnection.disconnect();
-    }
-
-    public void notificationBuilder(final HomePage homePage) {
-        final DateFormat[] df = new DateFormat[1];
-        final String[] date = new String[1];
-
-        Timer timer = new Timer();
-        TimerTask timeCheck = new TimerTask() {
-            @Override
-            public void run() {
-                df[0] = new SimpleDateFormat("mm H EEEE");
-                date[0] = df[0].format(Calendar.getInstance().getTime());
-                String[] currentMinute = date[0].split(" ");
-
-                int tempNum;
-                if (Integer.parseInt(currentMinute[0]) < 50) {
-                    tempNum = Integer.parseInt(currentMinute[0] + 10);
-                } else tempNum = Integer.parseInt(currentMinute[0]);
-                String nextClassCheck = tempNum + ":00";
-
-                if ((tempNum > 50) && (tempNum < 59)) {
-                    sqldb = dbHelper.getReadableDatabase();
-                    Cursor cursor = sqldb.query("TimeTable", new String[]{"StartTime", "Day"},
-                            "StartTime = " + "'" + String.valueOf(nextClassCheck) + "' AND " +
-                                    "", null, null, null, null);
-                    System.out.println(cursor.getString(0));
-                }
-
-
-                NotificationCompat.Builder notification = new NotificationCompat.Builder(homePage);
-                String titleString = "Your next class is ";
-
-            }
-        };
-
-
-        int[] days = {1, 2, 3, 4, 5};
-
-
-//        String titleString = "The current minute is" + currentMinute[1];
-        String userInfo = "User: " + user + "Dep:" + dep + "Course:" + course;
-        //Toast toast = Toast.makeText(HomePage.this, titleString, Toast.LENGTH_LONG);
-        //toast.show();
-
-        //NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(homePage)
-        // .setSmallIcon(R.drawable.notification_icon)
-        //.setContentTitle(titleString)
-        //.setContentText(userInfo);
-        /*Intent resultIntent = new Intent(this, TimeTableActivity.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(HomePage.class);
-
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,PendingIntent.FLAG_UPDATE_CURRENT);
-        mBuilder.setContentIntent(resultPendingIntent);*/
-        //NotificationManager mNotificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        //mNotificationManager.notify(1, mBuilder.build());
-    }
-
-    public String getUser() {
-        return user;
-    }
+    }*/
 
     public void setUser(String userType) {
         user = userType;
-    }
-
-    public String getDepartment() {
-        return dep;
     }
 
     public void setDepartment(String department) {
         dep = department;
     }
 
-    public String getCourse() {
-        return course;
-    }
-
     public void setCourse(String userCourse) {
         course = userCourse;
-    }
-
-    public String getSemester() {
-        return semester;
     }
 
     public void setSemester(String semesterChoice) {
@@ -182,7 +102,7 @@ public class Controller {
     public ArrayList<TableEntry> getAllTimeTableEntrys() {
         ArrayList<TableEntry> tableEntries = new ArrayList<TableEntry>();
         sqldb = dbHelper.getReadableDatabase();
-        Cursor cursor = sqldb.query(dbHelper.TABLENAME,
+        Cursor cursor = sqldb.query(MySQLLiteHelper.TABLENAME,
                 timeTableAllColumns, null, null, null, null, null);
 
         cursor.moveToFirst();
@@ -207,7 +127,7 @@ public class Controller {
     public ArrayList<LectureRoom> getAllRooms() {
         ArrayList<LectureRoom> roomList = new ArrayList<LectureRoom>();
         sqldb = dbHelper.getReadableDatabase();
-        Cursor cursor = sqldb.query(dbHelper.ROOMTABLENAME,
+        Cursor cursor = sqldb.query(MySQLLiteHelper.ROOMTABLENAME,
                 roomTableAllColumns, null, null, null, null, null);
 
         cursor.moveToFirst();
@@ -240,10 +160,10 @@ public class Controller {
             while ((currentLine = br.readLine()) != null) {
                 String[] split = currentLine.split("#");
                 String insert = "INSERT INTO " +
-                        dbHelper.ROOMTABLENAME + "(" +
-                        dbHelper.ROOMSNAME + "," +
-                        dbHelper.LONGITUDE + "," +
-                        dbHelper.LATITUDE + ")" + " VALUES("
+                        MySQLLiteHelper.ROOMTABLENAME + "(" +
+                        MySQLLiteHelper.ROOMSNAME + "," +
+                        MySQLLiteHelper.LONGITUDE + "," +
+                        MySQLLiteHelper.LATITUDE + ")" + " VALUES("
                         + split[0] + "," + split[1] + "," + split[2] + ")";
 
                 sqldb.execSQL(insert);
@@ -260,11 +180,11 @@ public class Controller {
     public void populateTimeTable(String module, String room, String time, String day) {
         sqldb = dbHelper.getWritableDatabase();
         String insertStatement = "INSERT INTO " +
-                dbHelper.TABLENAME + "(" +
-                dbHelper.CLASSNAME + "," +
-                dbHelper.ROOMNAME + "," +
-                dbHelper.STARTTIME + "," +
-                dbHelper.DAY + ") VALUES("
+                MySQLLiteHelper.TABLENAME + "(" +
+                MySQLLiteHelper.CLASSNAME + "," +
+                MySQLLiteHelper.ROOMNAME + "," +
+                MySQLLiteHelper.STARTTIME + "," +
+                MySQLLiteHelper.DAY + ") VALUES("
                 + "'" + module + "',"
                 + "'" + room + "',"
                 + "'" + time + "',"

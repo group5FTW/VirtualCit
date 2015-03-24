@@ -31,17 +31,25 @@
 
         <activity
             android:name=".Login"
-            android:label="Login" />
+            android:label="Login"
+            android:configChanges="orientation" />
 
         <activity
             android:name=".LaunchWebsite"
             android:label="MyCIT"
-            android:parentActivityName=".HomePage" />
+            android:parentActivityName=".HomePage"
+            android:configChanges="orientation" />
 
         <activity
             android:name=".TimeTableActivity"
-            android:label="MyTimeTable"
-            android:parentActivityName=".HomePage" />
+            android:label="My TimeTable"
+            android:parentActivityName=".HomePage"
+            android:configChanges="orientation" />
+        <activity
+            android:name=".LocateRoomActivity"
+            android:label=" Find Room"
+            android:parentActivityName=".HomePage"
+            android:configChanges="orientation" />
 
     </application>
 

@@ -30,4 +30,8 @@ public class LectureRoom {
     public void setGpsLatitude(int gpsLatitude) {
         this.gpsLatitude = gpsLatitude;
     }
+
+    public String toString() {
+        return getRoomName();
+    }
 }

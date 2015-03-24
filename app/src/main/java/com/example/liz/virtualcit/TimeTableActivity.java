@@ -1,5 +1,6 @@
 package com.example.liz.virtualcit;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.widget.ArrayAdapter;
@@ -22,5 +23,10 @@ public class TimeTableActivity extends ActionBarActivity {
         ArrayAdapter<TableEntry> adapter = new ArrayAdapter<TableEntry>(this,
                 android.R.layout.simple_list_item_1, values);
         lv.setAdapter(adapter);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
 }
