@@ -38,6 +38,7 @@ public class HomePage extends ActionBarActivity {
     private static final int CHILD_ACTIVITY_CODE = 1234;
     private ArrayList<MenuObject> options = new ArrayList<>();
     private int count = 0;
+    private String user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,7 +141,7 @@ public class HomePage extends ActionBarActivity {
             }
         }
 
-        if (temp.getName() == "CIT TimeTables") {
+        if ((temp.getName() == "CIT TimeTables") && (user == "Student")) {
 
             Intent i = new Intent(this, TimeTableActivity.class);
             startActivity(i);

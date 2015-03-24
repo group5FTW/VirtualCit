@@ -82,6 +82,9 @@ public class Controller {
         System.out.println("Connection opened");
         urlConnection.disconnect();
     }*/
+    public String getUser() {
+        return user;
+    }
 
     public void setUser(String userType) {
         user = userType;
@@ -143,8 +146,8 @@ public class Controller {
     public LectureRoom cursorToRoomEntry(Cursor cursor) {
         LectureRoom lr = new LectureRoom();
         lr.setRoomName(cursor.getString(0));
-        lr.setGpsLongitude(cursor.getInt(1));
-        lr.setGpsLatitude(cursor.getInt(2));
+        lr.setGpsLatitude(cursor.getDouble(1));
+        lr.setGpsLongitude(cursor.getDouble(2));
         return lr;
     }
 
@@ -162,8 +165,8 @@ public class Controller {
                 String insert = "INSERT INTO " +
                         MySQLLiteHelper.ROOMTABLENAME + "(" +
                         MySQLLiteHelper.ROOMSNAME + "," +
-                        MySQLLiteHelper.LONGITUDE + "," +
-                        MySQLLiteHelper.LATITUDE + ")" + " VALUES("
+                        MySQLLiteHelper.LATITUDE + "," +
+                        MySQLLiteHelper.LONGITUDE + ")" + " VALUES("
                         + split[0] + "," + split[1] + "," + split[2] + ")";
 
                 sqldb.execSQL(insert);
@@ -172,7 +175,7 @@ public class Controller {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Toast dbtoast = Toast.makeText(homePage, "Room Database Populated", Toast.LENGTH_LONG);
+        Toast dbtoast = Toast.makeText(homePage, "Locate Room Setup Complete", Toast.LENGTH_LONG);
         dbtoast.show();
         sqldb.close();
     }

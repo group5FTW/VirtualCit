@@ -34,8 +34,8 @@ public class MySQLLiteHelper extends SQLiteOpenHelper {
     private static final String ROOMTABLE_CREATE = "CREATE TABLE IF NOT EXISTS "
             + ROOMTABLENAME + "(" + ROOMSNAME
             + " text, "
-            + LONGITUDE + " integer not null, "
-            + LATITUDE + " integer not null);";
+            + LATITUDE + " double not null, "
+            + LONGITUDE + " double not null);";
 
     public MySQLLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

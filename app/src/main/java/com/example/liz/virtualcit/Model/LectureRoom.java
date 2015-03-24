@@ -3,9 +3,8 @@ package com.example.liz.virtualcit.Model;
 public class LectureRoom {
 
     private String roomName;
-    private String floorLevel;
-    private int gpsLongitude;
-    private int gpsLatitude;
+    private double gpsLongitude;
+    private double gpsLatitude;
 
     public String getRoomName() {
         return roomName;
@@ -15,19 +14,19 @@ public class LectureRoom {
         this.roomName = roomName;
     }
 
-    public int getGpsLongitude() {
+    public double getGpsLongitude() {
         return gpsLongitude;
     }
 
-    public void setGpsLongitude(int gpsLongitude) {
+    public void setGpsLongitude(double gpsLongitude) {
         this.gpsLongitude = gpsLongitude;
     }
 
-    public int getGpsLatitude() {
+    public double getGpsLatitude() {
         return gpsLatitude;
     }
 
-    public void setGpsLatitude(int gpsLatitude) {
+    public void setGpsLatitude(double gpsLatitude) {
         this.gpsLatitude = gpsLatitude;
     }
 

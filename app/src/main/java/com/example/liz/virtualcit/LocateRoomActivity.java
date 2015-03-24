@@ -29,6 +29,7 @@ public class LocateRoomActivity extends ActionBarActivity {
 
         roomList = Controller.getInstance().getAllRooms();
         System.out.println(roomList.get(2).getRoomName());
+        System.out.println(roomList.get(2).getGpsLatitude());
         try {
             ArrayAdapter<LectureRoom> roomArrayAdapter;
             roomArrayAdapter = new ArrayAdapter<LectureRoom>(this, android.R.layout.simple_list_item_1, roomList);
@@ -69,14 +70,14 @@ public class LocateRoomActivity extends ActionBarActivity {
 
         String currentLongitude = String.valueOf(loc.getLongitude());
         String currentLatitude = String.valueOf(loc.getLatitude());
+        System.out.println(currentLongitude + " " + currentLatitude);
         String url = "http://www.google.ie/maps/dir/";
         url += currentLatitude + "," + currentLongitude + "/";
-        url += lr.getGpsLongitude() + "+" + lr.getGpsLatitude() + "/";
+        url += lr.getGpsLatitude() + "+" + lr.getGpsLongitude() + "/";
         Uri uri = Uri.parse(url);//makes URL
         System.out.println("URL parsed");
 
         Intent map = new Intent(Intent.ACTION_VIEW, uri);
         startActivity(map);
-
     }
 }
