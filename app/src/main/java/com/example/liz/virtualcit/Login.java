@@ -18,30 +18,32 @@ public class Login extends ActionBarActivity {
     private String course;
     private String semester;
     Spinner semesterSpinner;
+    Spinner courseSpinner;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        userAlert();//calls alert when login is created
+        userAlert(this);//calls alert when login is created
 
     }
 
     public void launchHomePage()//creates home page intent
     {
         Intent i = new Intent(this, HomePage.class);
-        System.out.println(userType);
-        System.out.println(department);
-        System.out.println(course);
-        System.out.println(semester);
         i.putExtra("user", userType);
         i.putExtra("department", department);
         i.putExtra("course", course);
         i.putExtra("semester", semester);
-        setResult(RESULT_OK, i);
-        finish();
+
+        if (userType.compareToIgnoreCase("Guest") == 0) {
+            startActivity(i);
+        } else {
+            setResult(RESULT_OK, i);
+            finish();
+        }
     }
 
-    public void userAlert()//alert method
+    public void userAlert(Login login)//alert method
     {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
@@ -51,7 +53,7 @@ public class Login extends ActionBarActivity {
         alert.setPositiveButton("Guest", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int i) {
                 userType = "Guest";
-                launchHomePage();//launches straight into homePage if guest
+                launchHomePage();
             }
         });
 
@@ -69,11 +71,11 @@ public class Login extends ActionBarActivity {
 
 
     public void setSpinnerAdapters() {
-        String[] departmentChoice = {"Computing", "Accounting", "Snowboarding"};
-        String[] courseChoice = {"CO.DCOM3+-+KSDEV_8_Y3", "Numbers and Stuff", "Narley Things Yo"};
+        String[] departmentChoice = {"Computing"};
+        String[] courseChoice = {"CO.DCOM1 - A", "CO.DCOM1 - B", "CO.DCOM2-A", "CO.DCOM2-B", "CO.DCOM3", "CO.DCOM4", "CO.DCOM5", "CO.DCOM6"};
         String[] semesterChoice = {"Semester 1", "Semester 2"};
         Spinner departmentSpinner = (Spinner) findViewById(R.id.depSpinner);
-        Spinner courseSpinner = (Spinner) findViewById(R.id.courseSpinner);
+        courseSpinner = (Spinner) findViewById(R.id.courseSpinner);
         semesterSpinner = (Spinner) findViewById(R.id.semesterSpinner);
         Button submit = (Button) findViewById(R.id.button);
 
@@ -86,7 +88,18 @@ public class Login extends ActionBarActivity {
 
         departmentSpinner.setAdapter(adapter1);
         courseSpinner.setAdapter(adapter2);
+
         semesterSpinner.setAdapter(adapter3);
+
+        courseSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                course = courseSpinner.getSelectedItem().toString();
+            }
+
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                return;
+            }
+        });
 
         semesterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -99,7 +112,6 @@ public class Login extends ActionBarActivity {
         });
 
         department = departmentSpinner.getSelectedItem().toString();
-        course = courseSpinner.getSelectedItem().toString();
 
         submit.setOnClickListener(new View.OnClickListener() {
             @Override

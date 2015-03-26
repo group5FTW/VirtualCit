@@ -10,6 +10,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
@@ -45,6 +46,8 @@ public class HomePage extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
         Controller.getInstance().databaseConnection(this);
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         boolean previouslyStarted = prefs.getBoolean(getString(R.string.pref_prev_started), false);
 
@@ -86,13 +89,15 @@ public class HomePage extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        Intent i;
+        Intent i = new Intent(this, LaunchWebsite.class);
 
         if (id == R.id.image1) {
-            i = new Intent(Intent.ACTION_VIEW, Uri.parse("http://twitter.com/CIT_ie?lang=en"));
+            i.putExtra("name", "Twitter");
+            i.putExtra("url", "http://twitter.com/CIT_ie?lang=en");
             startActivity(i);
         } else if (id == R.id.image2) {
-            i = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.facebook.com/myCIT"));
+            i.putExtra("name", "Facebook");
+            i.putExtra("url", "http://www.facebook.com/myCIT");
             startActivity(i);
         }
 
@@ -140,6 +145,7 @@ public class HomePage extends ActionBarActivity {
             ArrayAdapter<MenuObject> menuAdapter;
             menuAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, options);
             listView.setAdapter(menuAdapter);
+            listView.deferNotifyDataSetChanged();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -259,8 +265,11 @@ public class HomePage extends ActionBarActivity {
             Uri uri = Uri.parse(url);//makes URL
 
             Intent maps = new Intent(Intent.ACTION_VIEW, uri);
-            PendingIntent pi = PendingIntent.getActivities(this, 0, new Intent[]{maps}, PendingIntent.FLAG_UPDATE_CURRENT);
-            notification.setContentIntent(pi);
+            if (roomList.get(position).getGpsLongitude() != 0) {
+                PendingIntent pi = PendingIntent.getActivities(this, 0, new Intent[]{maps}, PendingIntent.FLAG_UPDATE_CURRENT);
+                notification.setContentIntent(pi);
+            }
+
 
             NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             mNotificationManager.notify(1, notification.build());

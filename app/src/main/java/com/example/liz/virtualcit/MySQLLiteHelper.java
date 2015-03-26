@@ -45,9 +45,7 @@ public class MySQLLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase database) {
-        System.out.println(TIMETABLETABLE_CREATE);
         database.execSQL(TIMETABLETABLE_CREATE);
-        System.out.println(ROOMTABLE_CREATE);
         database.execSQL(ROOMTABLE_CREATE);
     }
 

@@ -11,12 +11,12 @@ import com.example.liz.virtualcit.Model.LectureRoom;
 import com.example.liz.virtualcit.Model.MenuObject;
 import com.example.liz.virtualcit.Model.TableEntry;
 import com.example.liz.virtualcit.MySQLLiteHelper;
-import com.example.liz.virtualcit.R;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 public class Controller {
@@ -156,28 +156,33 @@ public class Controller {
     }
 
     public void populateRoomTable(HomePage homePage) {
+
         sqldb = dbHelper.getWritableDatabase();
-        InputStream inputStream = homePage.getResources().openRawResource(R.raw.roominfo);
+
         try {
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader br = new BufferedReader(inputStreamReader);
+            String url = "jdbc:mysql://MYSQL5006.Smarterasp.net:3306";
+            Class.forName("com.mysql.jdbc.Driver");
+            System.out.println("Driver Registered!");
+            Connection con = DriverManager.getConnection(url, "9bd57b_citinfo", "group5ftw");
+            System.out.println("Database connection success");
 
-            String currentLine;
+            String result = "Database connection success\n";
+            Statement st = con.createStatement();
+            ResultSet rsSelect = st.executeQuery("select * from db_9bd57b_citinfo.roomInfo");
+            ResultSetMetaData rsmd = rsSelect.getMetaData();
 
-            while ((currentLine = br.readLine()) != null) {
-                String[] split = currentLine.split("#");
+            while (rsSelect.next()) {
                 String insertRooms = "INSERT INTO " + MySQLLiteHelper.ROOMTABLENAME
                         + "(" + MySQLLiteHelper.ROOMSNAME + ","
                         + MySQLLiteHelper.LATITUDE + ","
                         + MySQLLiteHelper.LONGITUDE
-                        + ") VALUES("
-                        + split[0] + ","
-                        + split[1] + ","
-                        + split[2] + ");";
+                        + ") VALUES(" + "'"
+                        + rsSelect.getString(1) + "'" + ","
+                        + rsSelect.getString(2) + ","
+                        + rsSelect.getString(3) + ");";
                 sqldb.execSQL(insertRooms);
             }
-            br.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         sqldb.close();

@@ -18,6 +18,7 @@ public class LaunchWebsite extends HomePage {
 
         Intent i = getIntent();
         String name = i.getStringExtra("name");
+        this.setTitle(name);
         url = i.getStringExtra("url");
 
         webview = new WebView(this);

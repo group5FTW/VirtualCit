@@ -118,7 +118,7 @@ public class LocateRoomActivity extends ActionBarActivity {
 
             String url = "http://www.google.ie/maps/dir/";
             url += currentLatitude + "," + currentLongitude + "/";
-            url += lr.getGpsLatitude() + "+" + lr.getGpsLongitude() + "/";
+            url += lr.getGpsLongitude() + "+" + lr.getGpsLatitude() + "/";
             Uri uri = Uri.parse(url);//makes URL
 
             Intent map = new Intent(Intent.ACTION_VIEW, uri);
