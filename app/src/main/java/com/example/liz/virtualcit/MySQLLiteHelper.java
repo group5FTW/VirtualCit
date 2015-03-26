@@ -9,6 +9,7 @@ public class MySQLLiteHelper extends SQLiteOpenHelper {
     //time table columns
     public static final String TABLENAME = "TimeTable";
     public static final String CLASSNAME = "Module";
+    public static final String TTPRIMARY_KEY = "ColumnNo";
     public static final String ROOMNAME = "RoomName";
     public static final String STARTTIME = "StartTime";
     public static final String DAY = "Day";
@@ -25,8 +26,9 @@ public class MySQLLiteHelper extends SQLiteOpenHelper {
 
     // Database creation sql statement
     private static final String TIMETABLETABLE_CREATE = "CREATE TABLE IF NOT EXISTS "
-            + TABLENAME + "(" + CLASSNAME
-            + " varchar(45) primary key, "
+            + TABLENAME + "(" + TTPRIMARY_KEY
+            + " integer primary key, "
+            + CLASSNAME + " varchar(45), "
             + ROOMNAME + " varchar(45), "
             + STARTTIME + " varchar(45), "
             + DAY + " integer not null);";

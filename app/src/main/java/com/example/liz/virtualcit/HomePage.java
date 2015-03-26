@@ -37,8 +37,8 @@ import java.util.TimerTask;
 public class HomePage extends ActionBarActivity {
     private static final int CHILD_ACTIVITY_CODE = 1234;
     private ArrayList<MenuObject> options = new ArrayList<>();
-    private int count = 0;
     private String user;
+    ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +47,8 @@ public class HomePage extends ActionBarActivity {
         Controller.getInstance().databaseConnection(this);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         boolean previouslyStarted = prefs.getBoolean(getString(R.string.pref_prev_started), false);
-        ListView listView = (ListView) findViewById(R.id.listView);
+
+        listView = (ListView) findViewById(R.id.listView);
 
         if (!previouslyStarted) {
             Controller.getInstance().populateRoomTable(this);
@@ -55,12 +56,19 @@ public class HomePage extends ActionBarActivity {
             edit.putBoolean(getString(R.string.pref_prev_started), Boolean.TRUE);
             edit.apply();
             showLogin();
+        } else {
+            showList(listView);
         }
 
-        if (count == 0) {
-            showList(listView);
-            count++;
-        }
+        Timer timer = new Timer();
+        TimerTask timeCheck = new TimerTask() {
+            @Override
+            public void run() {
+                notificationBuilder();
+                System.out.println("Notifications started");
+            }
+        };
+        timer.schedule(timeCheck, 1, 600000);
     }
 
     @Override
@@ -96,9 +104,23 @@ public class HomePage extends ActionBarActivity {
         startActivityForResult(i, CHILD_ACTIVITY_CODE);
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle saveInstanceState) {
+        user = Controller.getInstance().getUser();
+        saveInstanceState.putString("User", user);
+        super.onSaveInstanceState(saveInstanceState);
+    }
+
+    public void onRestoreInstanceState(Bundle saveInstanceState) {
+        super.onRestoreInstanceState(saveInstanceState);
+        user = saveInstanceState.getString("User");
+    }
+
     protected void onActivityResult(int requestCode, int resultCode, Intent intentFromLogin) {
         if (requestCode == CHILD_ACTIVITY_CODE && resultCode == RESULT_OK) {
+            user = intentFromLogin.getStringExtra("user");
             Controller.getInstance().setUser(intentFromLogin.getStringExtra("user"));
+
             Controller.getInstance().setDepartment(intentFromLogin.getStringExtra("department"));
             Controller.getInstance().setCourse(intentFromLogin.getStringExtra("course"));
             Controller.getInstance().setSemester(intentFromLogin.getStringExtra("semester"));
@@ -107,8 +129,7 @@ public class HomePage extends ActionBarActivity {
                     intentFromLogin.getStringExtra("course"),
                     intentFromLogin.getStringExtra("semester"));
             System.out.println("Semester: " + intentFromLogin.getStringExtra("semester"));
-            notificationBuilder(this);
-
+            showList(listView);
         }
     }
 
@@ -141,7 +162,7 @@ public class HomePage extends ActionBarActivity {
             }
         }
 
-        if ((temp.getName() == "CIT TimeTables") && (user == "Student")) {
+        if ((temp.getName() == "CIT TimeTables") && (user.compareToIgnoreCase("Student") == 0)) {
 
             Intent i = new Intent(this, TimeTableActivity.class);
             startActivity(i);
@@ -156,83 +177,98 @@ public class HomePage extends ActionBarActivity {
         }
     }
 
-    public void notificationBuilder(final HomePage homePage) {
+    public void notificationBuilder() {
+        int numDayOfWeek = 0;
 
-        Timer timer = new Timer();
-        TimerTask timeCheck = new TimerTask() {
-            @Override
-            public void run() {
-                System.out.println("Timer Started");
-                String[] numDaysOfWeek = {"1", "2", "3", "4", "5"};
-                DateFormat df = new SimpleDateFormat("mm H EEE");
-                System.out.println("Date format");
-                String date = df.format(Calendar.getInstance().getTime());
-                System.out.println(date);
-                String[] currentMinute = date.split(" ");
-                System.out.println("Date Split");
-                ArrayList<TableEntry> timeTable = Controller.getInstance().getAllTimeTableEntrys();
-                ArrayList<LectureRoom> roomList = Controller.getInstance().getAllRooms();
-                String titleString = "";
-                String launchNavString = "Touch to show in Map?";
-                System.out.println("ArrayLists Made");
-                TableEntry te = new TableEntry();
+        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+        Location loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        String currentLongitude = String.valueOf(loc.getLongitude());
+        String currentLatitude = String.valueOf(loc.getLatitude());
+        String launchNavString = "Touch to show in Map?";
 
-                for (int i = 0; i < 4; i++) {
-                    if (currentMinute[2] == numDaysOfWeek[i]) {
-                        System.out.println("first if");
-                        int tempNum;
-                        if (Integer.parseInt(currentMinute[0]) < 50) {
-                            tempNum = Integer.parseInt(currentMinute[0] + 10);
-                            System.out.println("second if");
-                        } else tempNum = Integer.parseInt(currentMinute[0]);
+        DateFormat df = new SimpleDateFormat("mm H EEEE");
+        String date = df.format(Calendar.getInstance().getTime());
+        String[] currentMinute = date.split(" ");
 
-                        if ((tempNum > 50) && (tempNum < 59)) {
-                            System.out.println("third if");
-                            for (int j = 0; j < timeTable.size(); j++) {
-                                int nextClassCheck = (Integer.parseInt(timeTable.get(j).getStartTime()) - 1);
-                                System.out.println("second for");
-                                if (Integer.parseInt(currentMinute[1]) == nextClassCheck) {
-                                    te = timeTable.get(j);
-                                    titleString = "You're next class is in room " + te.getRoomName();
+        ArrayList<TableEntry> timeTable = Controller.getInstance().getAllTimeTableEntrys();
+        ArrayList<LectureRoom> roomList = Controller.getInstance().getAllRooms();
+        String titleString = "";
+        boolean classFound = false;
 
-                                } else if ((Integer.parseInt(currentMinute[1]) == 12) && (nextClassCheck == 1)) {
-                                    te = timeTable.get(j);
-                                    titleString = "You're next class is in room " + te.getRoomName();
-                                }
-                            }
+        TableEntry te = new TableEntry();
 
-                            int position = 0;
-                            for (int x = 0; x < roomList.size(); x++) {
-                                if (roomList.get(x).getRoomName() == te.getRoomName()) {
-                                    position = x;
-                                }
-                            }
+        if (currentMinute[2].compareToIgnoreCase("Monday") == 0) numDayOfWeek = 1;
+        else if (currentMinute[2].compareToIgnoreCase("Tuesday") == 0) numDayOfWeek = 2;
+        else if (currentMinute[2].compareToIgnoreCase("Wednesday") == 0) numDayOfWeek = 3;
+        else if (currentMinute[2].compareToIgnoreCase("Thursday") == 0) numDayOfWeek = 4;
+        else if (currentMinute[2].compareToIgnoreCase("Friday") == 0) numDayOfWeek = 5;
+        else {
+            numDayOfWeek = 0;
+        }
 
-                            NotificationCompat.Builder notification = new NotificationCompat.Builder(homePage)
-                                    .setSmallIcon(R.drawable.notification_icon)
-                                    .setContentTitle(titleString)
-                                    .setContentText(launchNavString);
+        int tempNum;
+        System.out.println("Today date is " + currentMinute[2] + " num = " + numDayOfWeek);
 
-                            LocationManager lm = (LocationManager) homePage.getSystemService(LOCATION_SERVICE);
-                            Location loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                            String currentLongitude = String.valueOf(loc.getLongitude());
-                            String currentLatitude = String.valueOf(loc.getLatitude());
-                            String url = "http://www.google.ie/maps/dir/";
-                            url += currentLatitude + "," + currentLongitude + "/";
-                            url += roomList.get(position).getGpsLatitude() + "+" + roomList.get(position).getGpsLongitude() + "/";
-                            Uri uri = Uri.parse(url);//makes URL
+        if (Integer.parseInt(currentMinute[0]) < 50) {
+            tempNum = Integer.parseInt(currentMinute[0] + 10);
+            System.out.println("Current minute " + currentMinute[0]);
+        } else {
+            tempNum = Integer.parseInt(currentMinute[0]);
+        }
 
-                            Intent maps = new Intent(Intent.ACTION_VIEW, uri);
-                            PendingIntent pi = PendingIntent.getActivities(homePage, 0, new Intent[]{maps}, PendingIntent.FLAG_UPDATE_CURRENT);
-                            notification.setContentIntent(pi);
+        if ((tempNum > 50) && (tempNum < 59)) {
+            System.out.println("between 50-59");
+            for (int j = 0; j < timeTable.size(); j++) {
+                int nextClassCheck = (Integer.parseInt(timeTable.get(j).getStartTime()) - 1);//get the time of the next class
+                System.out.println("second for");
+                //checks if there are classes that match the time and are on today
+                if ((Integer.parseInt(currentMinute[1]) == nextClassCheck)
+                        && (numDayOfWeek == timeTable.get(j).getDay())) {
+                    te = timeTable.get(j);
+                    titleString = "You're next class is in room " + te.getRoomName();
+                    System.out.println("Class Found");
+                }
+                //if the class is at 1 and the current time is 12
+                else if ((Integer.parseInt(currentMinute[1]) == 12) && (nextClassCheck == 1)
+                        && (numDayOfWeek == timeTable.get(j).getDay())) {
+                    te = timeTable.get(j);
+                    titleString = "You're next class is in room " + te.getRoomName();
+                    System.out.println("Class between 12 and 1 Found");
+                    classFound = true;
 
-                            NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                            mNotificationManager.notify(1, notification.build());
-                        }
-                    }
                 }
             }
-        };
-        timer.schedule(timeCheck, 01, 1000 * 60 * 60);
+        }
+
+        if (classFound == true) {
+            NotificationCompat.Builder notification = new NotificationCompat.Builder(this)
+                    .setSmallIcon(R.drawable.notification_icon)
+                    .setContentTitle(titleString)
+                    .setContentText(launchNavString);
+
+            int position = 0;
+            for (int x = 0; x < roomList.size(); x++) {
+                if (roomList.get(x).getRoomName() == te.getRoomName()) {
+                    position = x;
+                }
+            }
+
+            String url = "http://www.google.ie/maps/dir/";
+            url += currentLatitude + "," + currentLongitude + "/";
+            url += roomList.get(position).getGpsLatitude() + "+" + roomList.get(position).getGpsLongitude() + "/";
+            Uri uri = Uri.parse(url);//makes URL
+
+            Intent maps = new Intent(Intent.ACTION_VIEW, uri);
+            PendingIntent pi = PendingIntent.getActivities(this, 0, new Intent[]{maps}, PendingIntent.FLAG_UPDATE_CURRENT);
+            notification.setContentIntent(pi);
+
+            NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotificationManager.notify(1, notification.build());
+        } else {
+            System.out.println("No Time available");
+            classFound = false;
+        }
+
+
     }
 }

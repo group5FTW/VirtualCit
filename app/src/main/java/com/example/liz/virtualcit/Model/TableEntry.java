@@ -6,7 +6,7 @@ public class TableEntry {
     private String roomName;
     private String startTime;
     private int day;
-    private String[] dayName = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+    private String[] dayName = {"", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
 
     public String getModule() {
         return module;
@@ -46,7 +46,7 @@ public class TableEntry {
 
     @Override
     public String toString() {
-        return startTime + " " + getDayName() + " " + roomName + " "
+        return startTime + "\n " + getDayName() + "\n " + roomName + "\n "
                 + module;
     }
 }

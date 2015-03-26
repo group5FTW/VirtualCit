@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -16,6 +17,7 @@ public class Login extends ActionBarActivity {
     private String department;
     private String course;
     private String semester;
+    Spinner semesterSpinner;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,8 +74,9 @@ public class Login extends ActionBarActivity {
         String[] semesterChoice = {"Semester 1", "Semester 2"};
         Spinner departmentSpinner = (Spinner) findViewById(R.id.depSpinner);
         Spinner courseSpinner = (Spinner) findViewById(R.id.courseSpinner);
-        Spinner semesterSpinner = (Spinner) findViewById(R.id.semesterSpinner);
+        semesterSpinner = (Spinner) findViewById(R.id.semesterSpinner);
         Button submit = (Button) findViewById(R.id.button);
+
         ArrayAdapter<String> adapter1 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, departmentChoice);
         ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, courseChoice);
         ArrayAdapter<String> adapter3 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, semesterChoice);
@@ -85,9 +88,18 @@ public class Login extends ActionBarActivity {
         courseSpinner.setAdapter(adapter2);
         semesterSpinner.setAdapter(adapter3);
 
+        semesterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                semester = semesterSpinner.getSelectedItem().toString();
+            }
+
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                return;
+            }
+        });
+
         department = departmentSpinner.getSelectedItem().toString();
         course = courseSpinner.getSelectedItem().toString();
-        semester = semesterSpinner.getSelectedItem().toString();
 
         submit.setOnClickListener(new View.OnClickListener() {
             @Override

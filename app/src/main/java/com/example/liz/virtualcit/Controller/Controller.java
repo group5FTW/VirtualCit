@@ -1,5 +1,6 @@
 package com.example.liz.virtualcit.Controller;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.NotificationCompat;
@@ -22,6 +23,7 @@ public class Controller {
     private static Controller instance;
     private ArrayList menuArray = new ArrayList();
     public NotificationCompat.Builder notification;
+    private int keyValue;
     private String user;
     private String dep;
     private String course;
@@ -61,7 +63,6 @@ public class Controller {
         return menuArray;
     }
 
-
     public ArrayList getMenu() {
         menuArray = loadOptions();
         return menuArray;
@@ -82,6 +83,7 @@ public class Controller {
         System.out.println("Connection opened");
         urlConnection.disconnect();
     }*/
+
     public String getUser() {
         return user;
     }
@@ -115,6 +117,7 @@ public class Controller {
             cursor.moveToNext();
         }
         cursor.close();
+        sqldb.close();
         return tableEntries;
     }
 
@@ -140,6 +143,7 @@ public class Controller {
             cursor.moveToNext();
         }
         cursor.close();
+        sqldb.close();
         return roomList;
     }
 
@@ -162,39 +166,38 @@ public class Controller {
 
             while ((currentLine = br.readLine()) != null) {
                 String[] split = currentLine.split("#");
-                String insert = "INSERT INTO " +
-                        MySQLLiteHelper.ROOMTABLENAME + "(" +
-                        MySQLLiteHelper.ROOMSNAME + "," +
-                        MySQLLiteHelper.LATITUDE + "," +
-                        MySQLLiteHelper.LONGITUDE + ")" + " VALUES("
-                        + split[0] + "," + split[1] + "," + split[2] + ")";
-
-                sqldb.execSQL(insert);
+                String insertRooms = "INSERT INTO " + MySQLLiteHelper.ROOMTABLENAME
+                        + "(" + MySQLLiteHelper.ROOMSNAME + ","
+                        + MySQLLiteHelper.LATITUDE + ","
+                        + MySQLLiteHelper.LONGITUDE
+                        + ") VALUES("
+                        + split[0] + ","
+                        + split[1] + ","
+                        + split[2] + ");";
+                sqldb.execSQL(insertRooms);
             }
             br.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        sqldb.close();
         Toast dbtoast = Toast.makeText(homePage, "Locate Room Setup Complete", Toast.LENGTH_LONG);
         dbtoast.show();
-        sqldb.close();
+
     }
 
-    public void populateTimeTable(String module, String room, String time, String day) {
+    public void populateTimeTable(String module, String room, String time, int day) {
+
         sqldb = dbHelper.getWritableDatabase();
-        String insertStatement = "INSERT INTO " +
-                MySQLLiteHelper.TABLENAME + "(" +
-                MySQLLiteHelper.CLASSNAME + "," +
-                MySQLLiteHelper.ROOMNAME + "," +
-                MySQLLiteHelper.STARTTIME + "," +
-                MySQLLiteHelper.DAY + ") VALUES("
-                + "'" + module + "',"
-                + "'" + room + "',"
-                + "'" + time + "',"
-                + "'" + day + "');";
+        ContentValues values = new ContentValues();
+        values.put(MySQLLiteHelper.TTPRIMARY_KEY, keyValue);
+        values.put(MySQLLiteHelper.CLASSNAME, module);
+        values.put(MySQLLiteHelper.ROOMNAME, room);
+        values.put(MySQLLiteHelper.STARTTIME, time);
+        values.put(MySQLLiteHelper.DAY, day);
 
-        System.out.println(insertStatement);
+        long rowID = sqldb.insert(MySQLLiteHelper.TABLENAME, "NULL", values);
 
-        sqldb.execSQL(insertStatement);
+        keyValue++;
     }
 }
