@@ -10,7 +10,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,7 +21,7 @@ import com.example.liz.virtualcit.Model.LectureRoom;
 
 import java.util.ArrayList;
 
-public class LocateRoomActivity extends ActionBarActivity {
+public class LocateRoomActivity extends HomePage {
     ListView listView;
     ArrayList<LectureRoom> roomList;
     Location currentLoc;

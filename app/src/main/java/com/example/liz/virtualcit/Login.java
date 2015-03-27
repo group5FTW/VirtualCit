@@ -23,8 +23,13 @@ public class Login extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        userAlert(this);//calls alert when login is created
+        userAlert();//calls alert when login is created
 
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
 
     public void launchHomePage()//creates home page intent
@@ -34,16 +39,10 @@ public class Login extends ActionBarActivity {
         i.putExtra("department", department);
         i.putExtra("course", course);
         i.putExtra("semester", semester);
-
-        if (userType.compareToIgnoreCase("Guest") == 0) {
-            startActivity(i);
-        } else {
-            setResult(RESULT_OK, i);
-            finish();
-        }
+        setResult(RESULT_OK, i);
     }
 
-    public void userAlert(Login login)//alert method
+    public void userAlert()//alert method
     {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
@@ -68,7 +67,6 @@ public class Login extends ActionBarActivity {
 
         alert.show();
     }
-
 
     public void setSpinnerAdapters() {
         String[] departmentChoice = {"Computing"};
@@ -119,11 +117,6 @@ public class Login extends ActionBarActivity {
                 launchHomePage();
             }
         });
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
     }
 
 }

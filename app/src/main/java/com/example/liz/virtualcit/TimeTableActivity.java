@@ -2,7 +2,6 @@ package com.example.liz.virtualcit;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -11,7 +10,7 @@ import com.example.liz.virtualcit.Model.TableEntry;
 
 import java.util.ArrayList;
 
-public class TimeTableActivity extends ActionBarActivity {
+public class TimeTableActivity extends HomePage {
     ListView lv;
 
     public void onCreate(Bundle savedInstanceState) {

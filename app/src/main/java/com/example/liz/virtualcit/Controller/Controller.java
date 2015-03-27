@@ -60,6 +60,8 @@ public class Controller {
         menuArray.add(mo);
         mo = new MenuObject("Locate Room", "Locates the room");
         menuArray.add(mo);
+        mo = new MenuObject("Log Out", "Logs User Out");
+        menuArray.add(mo);
         return menuArray;
     }
 
@@ -73,16 +75,6 @@ public class Controller {
         sqldb = dbHelper.getWritableDatabase();
         sqldb.close();
     }
-
-    /*public void localHostConnection(HomePage homePage) throws IOException {
-        URL url = new URL("http://localhost:8080/");
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        Toast toast = Toast.makeText(homePage, "Connection set", Toast.LENGTH_LONG);
-        toast.show();
-
-        System.out.println("Connection opened");
-        urlConnection.disconnect();
-    }*/
 
     public String getUser() {
         return user;
@@ -102,6 +94,58 @@ public class Controller {
 
     public void setSemester(String semesterChoice) {
         semester = semesterChoice;
+    }
+
+    public void populateRoomTable(HomePage homePage) {
+
+        sqldb = dbHelper.getWritableDatabase();
+
+        try {
+            String url = "jdbc:mysql://MYSQL5006.Smarterasp.net:3306";
+            Class.forName("com.mysql.jdbc.Driver");
+            System.out.println("Driver Registered!");
+            Connection con = DriverManager.getConnection(url, "9bd57b_citinfo", "group5ftw");
+            System.out.println("Database connection success");
+
+            String result = "Database connection success\n";
+            Statement st = con.createStatement();
+            ResultSet rsSelect = st.executeQuery("select * from db_9bd57b_citinfo.roomInfo order by roomName asc");
+            ResultSetMetaData rsmd = rsSelect.getMetaData();
+
+            while (rsSelect.next()) {
+                String insertRooms = "INSERT INTO " + MySQLLiteHelper.ROOMTABLENAME
+                        + "(" + MySQLLiteHelper.ROOMSNAME + ","
+                        + MySQLLiteHelper.LATITUDE + ","
+                        + MySQLLiteHelper.LONGITUDE
+                        + ") VALUES(" + "'"
+                        + rsSelect.getString(1) + "'" + ","
+                        + rsSelect.getString(2) + ","
+                        + rsSelect.getString(3) + ");";
+                sqldb.execSQL(insertRooms);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        sqldb.close();
+        Toast dbtoast = Toast.makeText(homePage, "Locate Room Setup Complete", Toast.LENGTH_LONG);
+        dbtoast.show();
+
+    }
+
+    public void populateTimeTable(String module, String room, String time, int day) {
+
+        sqldb = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(MySQLLiteHelper.TTPRIMARY_KEY, keyValue);
+        values.put(MySQLLiteHelper.CLASSNAME, module);
+        values.put(MySQLLiteHelper.ROOMNAME, room);
+        values.put(MySQLLiteHelper.STARTTIME, time);
+        values.put(MySQLLiteHelper.DAY, day);
+
+        long rowID = sqldb.insert(MySQLLiteHelper.TABLENAME, "NULL", values);
+
+        keyValue++;
+        sqldb.close();
     }
 
     public ArrayList<TableEntry> getAllTimeTableEntrys() {
@@ -155,54 +199,5 @@ public class Controller {
         return lr;
     }
 
-    public void populateRoomTable(HomePage homePage) {
 
-        sqldb = dbHelper.getWritableDatabase();
-
-        try {
-            String url = "jdbc:mysql://MYSQL5006.Smarterasp.net:3306";
-            Class.forName("com.mysql.jdbc.Driver");
-            System.out.println("Driver Registered!");
-            Connection con = DriverManager.getConnection(url, "9bd57b_citinfo", "group5ftw");
-            System.out.println("Database connection success");
-
-            String result = "Database connection success\n";
-            Statement st = con.createStatement();
-            ResultSet rsSelect = st.executeQuery("select * from db_9bd57b_citinfo.roomInfo");
-            ResultSetMetaData rsmd = rsSelect.getMetaData();
-
-            while (rsSelect.next()) {
-                String insertRooms = "INSERT INTO " + MySQLLiteHelper.ROOMTABLENAME
-                        + "(" + MySQLLiteHelper.ROOMSNAME + ","
-                        + MySQLLiteHelper.LATITUDE + ","
-                        + MySQLLiteHelper.LONGITUDE
-                        + ") VALUES(" + "'"
-                        + rsSelect.getString(1) + "'" + ","
-                        + rsSelect.getString(2) + ","
-                        + rsSelect.getString(3) + ");";
-                sqldb.execSQL(insertRooms);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        sqldb.close();
-        Toast dbtoast = Toast.makeText(homePage, "Locate Room Setup Complete", Toast.LENGTH_LONG);
-        dbtoast.show();
-
-    }
-
-    public void populateTimeTable(String module, String room, String time, int day) {
-
-        sqldb = dbHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(MySQLLiteHelper.TTPRIMARY_KEY, keyValue);
-        values.put(MySQLLiteHelper.CLASSNAME, module);
-        values.put(MySQLLiteHelper.ROOMNAME, room);
-        values.put(MySQLLiteHelper.STARTTIME, time);
-        values.put(MySQLLiteHelper.DAY, day);
-
-        long rowID = sqldb.insert(MySQLLiteHelper.TABLENAME, "NULL", values);
-
-        keyValue++;
-    }
 }

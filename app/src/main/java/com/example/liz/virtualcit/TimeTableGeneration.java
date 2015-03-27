@@ -30,13 +30,12 @@ public class TimeTableGeneration {
     String hyphen = "-";
     int periodsHigh = 8;
     String fifthUrlPart = "&height=100&width=100";
-    private ArrayList timeTableList;
 
     public TimeTableGeneration(HomePage hp, String course, String semesterChoice) {
         setSemester(semesterChoice);
         String siteUrl = firstUrlPart + course + secondUrlPart + semester + thirdUrlPart;
         new ParseURL().execute(new String[]{siteUrl});
-        Toast ttToast = Toast.makeText(hp, "Time Table Created", Toast.LENGTH_LONG);
+        Toast ttToast = Toast.makeText(hp, "Time Table Generating.. Please Wait..", Toast.LENGTH_LONG);
         ttToast.show();
     }
 

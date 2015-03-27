@@ -38,8 +38,8 @@ import java.util.TimerTask;
 public class HomePage extends ActionBarActivity {
     private static final int CHILD_ACTIVITY_CODE = 1234;
     private ArrayList<MenuObject> options = new ArrayList<>();
-    private String user;
-    ListView listView;
+    private static String user;
+    private ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,18 +49,18 @@ public class HomePage extends ActionBarActivity {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        boolean previouslyStarted = prefs.getBoolean(getString(R.string.pref_prev_started), false);
+        boolean previouslyStarted = prefs.getBoolean("start", false);
 
         listView = (ListView) findViewById(R.id.listView);
 
         if (!previouslyStarted) {
             Controller.getInstance().populateRoomTable(this);
             SharedPreferences.Editor edit = prefs.edit();
-            edit.putBoolean(getString(R.string.pref_prev_started), Boolean.TRUE);
+            edit.putBoolean("start", Boolean.TRUE);
             edit.apply();
             showLogin();
         } else {
-            showList(listView);
+            user = prefs.getString("User", user);
         }
 
         Timer timer = new Timer();
@@ -104,11 +104,6 @@ public class HomePage extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void showLogin() {
-        Intent i = new Intent(this, Login.class);
-        startActivityForResult(i, CHILD_ACTIVITY_CODE);
-    }
-
     @Override
     public void onSaveInstanceState(Bundle saveInstanceState) {
         user = Controller.getInstance().getUser();
@@ -116,26 +111,44 @@ public class HomePage extends ActionBarActivity {
         super.onSaveInstanceState(saveInstanceState);
     }
 
+    @Override
     public void onRestoreInstanceState(Bundle saveInstanceState) {
         super.onRestoreInstanceState(saveInstanceState);
         user = saveInstanceState.getString("User");
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent intentFromLogin) {
+
         if (requestCode == CHILD_ACTIVITY_CODE && resultCode == RESULT_OK) {
             user = intentFromLogin.getStringExtra("user");
-            Controller.getInstance().setUser(intentFromLogin.getStringExtra("user"));
+            if (user.compareToIgnoreCase("Student") == 0) {
+                Controller.getInstance().setUser(intentFromLogin.getStringExtra("user"));
+                Controller.getInstance().setDepartment(intentFromLogin.getStringExtra("department"));
+                Controller.getInstance().setCourse(intentFromLogin.getStringExtra("course"));
+                Controller.getInstance().setSemester(intentFromLogin.getStringExtra("semester"));
 
-            Controller.getInstance().setDepartment(intentFromLogin.getStringExtra("department"));
-            Controller.getInstance().setCourse(intentFromLogin.getStringExtra("course"));
-            Controller.getInstance().setSemester(intentFromLogin.getStringExtra("semester"));
+                TimeTableGeneration ttg = new TimeTableGeneration(this,
+                        intentFromLogin.getStringExtra("course"),
+                        intentFromLogin.getStringExtra("semester"));
+                System.out.println("Semester: " + intentFromLogin.getStringExtra("semester"));
 
-            TimeTableGeneration ttg = new TimeTableGeneration(this,
-                    intentFromLogin.getStringExtra("course"),
-                    intentFromLogin.getStringExtra("semester"));
-            System.out.println("Semester: " + intentFromLogin.getStringExtra("semester"));
+            } else {
+                Controller.getInstance().setUser(intentFromLogin.getStringExtra("user"));
+            }
+
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+            SharedPreferences.Editor edit = preferences.edit();
+            edit.putString("User", user);
+            edit.apply();
             showList(listView);
+        } else {
+            System.out.println("Error returned from login");
         }
+    }
+
+    public void showLogin() {
+        Intent i = new Intent(this, Login.class);
+        startActivityForResult(i, CHILD_ACTIVITY_CODE);
     }
 
     public void showList(ListView listView) {
@@ -161,6 +174,7 @@ public class HomePage extends ActionBarActivity {
 
     public void optionChoice(String menuOption) {
         MenuObject temp = new MenuObject();
+        System.out.println(Controller.getInstance().getUser());
         for (int i = 0; i < options.size(); i++) {
 
             if (options.get(i).toString().equals(menuOption)) {
@@ -168,13 +182,15 @@ public class HomePage extends ActionBarActivity {
             }
         }
 
-        if ((temp.getName() == "CIT TimeTables") && (user.compareToIgnoreCase("Student") == 0)) {
+        if ((temp.getName() == "CIT TimeTables") && (Controller.getInstance().getUser().compareToIgnoreCase("Student") == 0)) {
 
             Intent i = new Intent(this, TimeTableActivity.class);
             startActivity(i);
         } else if (temp.getName() == "Locate Room") {
             Intent lrIntent = new Intent(this, LocateRoomActivity.class);
             startActivity(lrIntent);
+        } else if (temp.getName() == "Log Out") {
+            showLogin();
         } else {
             Intent intent = new Intent(this, LaunchWebsite.class);
             intent.putExtra("name", temp.getName());
@@ -225,7 +241,8 @@ public class HomePage extends ActionBarActivity {
         if ((tempNum > 50) && (tempNum < 59)) {
             System.out.println("between 50-59");
             for (int j = 0; j < timeTable.size(); j++) {
-                int nextClassCheck = (Integer.parseInt(timeTable.get(j).getStartTime()) - 1);//get the time of the next class
+                String[] startHour = timeTable.get(j).getStartTime().split(":");
+                int nextClassCheck = (Integer.parseInt(startHour[0]) - 1);//get the time of the next class
                 System.out.println("second for");
                 //checks if there are classes that match the time and are on today
                 if ((Integer.parseInt(currentMinute[1]) == nextClassCheck)
@@ -252,30 +269,28 @@ public class HomePage extends ActionBarActivity {
                     .setContentTitle(titleString)
                     .setContentText(launchNavString);
 
-            int position = 0;
+            int roomPosition = 0;
             for (int x = 0; x < roomList.size(); x++) {
                 if (roomList.get(x).getRoomName() == te.getRoomName()) {
-                    position = x;
+                    roomPosition = x;
                 }
             }
 
             String url = "http://www.google.ie/maps/dir/";
             url += currentLatitude + "," + currentLongitude + "/";
-            url += roomList.get(position).getGpsLatitude() + "+" + roomList.get(position).getGpsLongitude() + "/";
+            url += roomList.get(roomPosition).getGpsLatitude() + "+" + roomList.get(roomPosition).getGpsLongitude() + "/";
             Uri uri = Uri.parse(url);//makes URL
 
             Intent maps = new Intent(Intent.ACTION_VIEW, uri);
-            if (roomList.get(position).getGpsLongitude() != 0) {
+            if (roomList.get(roomPosition).getGpsLongitude() != 0) {
                 PendingIntent pi = PendingIntent.getActivities(this, 0, new Intent[]{maps}, PendingIntent.FLAG_UPDATE_CURRENT);
                 notification.setContentIntent(pi);
             }
-
 
             NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             mNotificationManager.notify(1, notification.build());
         } else {
             System.out.println("No Time available");
-            classFound = false;
         }
 
 
