@@ -1,13 +1,17 @@
 package com.example.liz.virtualcit;
 
+import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -22,6 +26,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.liz.virtualcit.Controller.Controller;
 import com.example.liz.virtualcit.Model.LectureRoom;
@@ -45,13 +50,14 @@ public class HomePage extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
+        listView = (ListView) findViewById(R.id.listView);
+
         Controller.getInstance().databaseConnection(this);
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         boolean previouslyStarted = prefs.getBoolean("start", false);
-
-        listView = (ListView) findViewById(R.id.listView);
 
         if (!previouslyStarted) {
             Controller.getInstance().populateRoomTable(this);
@@ -59,8 +65,6 @@ public class HomePage extends ActionBarActivity {
             edit.putBoolean("start", Boolean.TRUE);
             edit.apply();
             showLogin();
-        } else {
-            user = prefs.getString("User", user);
         }
 
         Timer timer = new Timer();
@@ -72,6 +76,13 @@ public class HomePage extends ActionBarActivity {
             }
         };
         timer.schedule(timeCheck, 1, 600000);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        listView.invalidate();
+        showList(listView);
     }
 
     @Override
@@ -119,6 +130,7 @@ public class HomePage extends ActionBarActivity {
 
     protected void onActivityResult(int requestCode, int resultCode, Intent intentFromLogin) {
 
+        boolean network = isNetworkAvailable();
         if (requestCode == CHILD_ACTIVITY_CODE && resultCode == RESULT_OK) {
             user = intentFromLogin.getStringExtra("user");
             if (user.compareToIgnoreCase("Student") == 0) {
@@ -132,6 +144,21 @@ public class HomePage extends ActionBarActivity {
                         intentFromLogin.getStringExtra("semester"));
                 System.out.println("Semester: " + intentFromLogin.getStringExtra("semester"));
 
+                if (network == false) {
+                    AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+                    alert.setTitle("No connection");
+                    alert.setMessage("Personal Timetable could not be generated as there is no network connection." +
+                            "Please turn on WiFi or connection, log out and re enter your details.");
+
+                    alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    });
+
+                    alert.show();
+                }
             } else {
                 Controller.getInstance().setUser(intentFromLogin.getStringExtra("user"));
             }
@@ -146,19 +173,26 @@ public class HomePage extends ActionBarActivity {
         }
     }
 
+    public boolean isNetworkAvailable() {
+        ConnectivityManager connectManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
     public void showLogin() {
         Intent i = new Intent(this, Login.class);
         startActivityForResult(i, CHILD_ACTIVITY_CODE);
     }
 
     public void showList(ListView listView) {
-        options = Controller.getInstance().getMenu();
-
+        options.clear();
         try {
+            options = Controller.getInstance().getMenu();
             ArrayAdapter<MenuObject> menuAdapter;
             menuAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, options);
             listView.setAdapter(menuAdapter);
-            listView.deferNotifyDataSetChanged();
+            listView.getAdapter().notify();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -174,7 +208,6 @@ public class HomePage extends ActionBarActivity {
 
     public void optionChoice(String menuOption) {
         MenuObject temp = new MenuObject();
-        System.out.println(Controller.getInstance().getUser());
         for (int i = 0; i < options.size(); i++) {
 
             if (options.get(i).toString().equals(menuOption)) {
@@ -183,34 +216,67 @@ public class HomePage extends ActionBarActivity {
         }
 
         if ((temp.getName() == "CIT TimeTables") && (Controller.getInstance().getUser().compareToIgnoreCase("Student") == 0)) {
-
             Intent i = new Intent(this, TimeTableActivity.class);
             startActivity(i);
         } else if (temp.getName() == "Locate Room") {
             Intent lrIntent = new Intent(this, LocateRoomActivity.class);
             startActivity(lrIntent);
         } else if (temp.getName() == "Log Out") {
-            showLogin();
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+            SharedPreferences.Editor edit = prefs.edit();
+            edit.putBoolean("start", Boolean.FALSE);
+            edit.apply();
+            Toast exit = Toast.makeText(this, "Logging out...", Toast.LENGTH_LONG);
+            exit.show();
+            finish();
+
         } else {
-            Intent intent = new Intent(this, LaunchWebsite.class);
-            intent.putExtra("name", temp.getName());
-            intent.putExtra("url", temp.getUrl());
-            startActivity(intent);
+            boolean network = isNetworkAvailable();
+            if (network == false) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+                alert.setTitle("No connection!");
+                alert.setMessage("A network connection is required to load this site. " +
+                        "Please connect to a network and try again.");
+
+                alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+
+                alert.show();
+            } else {
+                Intent intent = new Intent(this, LaunchWebsite.class);
+                intent.putExtra("name", temp.getName());
+                intent.putExtra("url", temp.getUrl());
+                startActivity(intent);
+            }
+
         }
     }
 
     public void notificationBuilder() {
         int numDayOfWeek = 0;
 
+        //getting the users current location
         LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
         Location loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         String currentLongitude = String.valueOf(loc.getLongitude());
         String currentLatitude = String.valueOf(loc.getLatitude());
         String launchNavString = "Touch to show in Map?";
 
+        //getting the current date
         DateFormat df = new SimpleDateFormat("mm H EEEE");
         String date = df.format(Calendar.getInstance().getTime());
-        String[] currentMinute = date.split(" ");
+        String[] currentTime = date.split(" ");
+        int minute = Integer.parseInt(currentTime[0]);
+        int currentHour = Integer.parseInt(currentTime[1]);
+        String today = currentTime[2];
+
+        if (currentHour > 12) {
+            currentHour = currentHour - 12;
+        }
 
         ArrayList<TableEntry> timeTable = Controller.getInstance().getAllTimeTableEntrys();
         ArrayList<LectureRoom> roomList = Controller.getInstance().getAllRooms();
@@ -219,40 +285,38 @@ public class HomePage extends ActionBarActivity {
 
         TableEntry te = new TableEntry();
 
-        if (currentMinute[2].compareToIgnoreCase("Monday") == 0) numDayOfWeek = 1;
-        else if (currentMinute[2].compareToIgnoreCase("Tuesday") == 0) numDayOfWeek = 2;
-        else if (currentMinute[2].compareToIgnoreCase("Wednesday") == 0) numDayOfWeek = 3;
-        else if (currentMinute[2].compareToIgnoreCase("Thursday") == 0) numDayOfWeek = 4;
-        else if (currentMinute[2].compareToIgnoreCase("Friday") == 0) numDayOfWeek = 5;
+        if (today.compareToIgnoreCase("Monday") == 0) numDayOfWeek = 1;
+        else if (today.compareToIgnoreCase("Tuesday") == 0) numDayOfWeek = 2;
+        else if (today.compareToIgnoreCase("Wednesday") == 0) numDayOfWeek = 3;
+        else if (today.compareToIgnoreCase("Thursday") == 0) numDayOfWeek = 4;
+        else if (today.compareToIgnoreCase("Friday") == 0) numDayOfWeek = 5;
         else {
             numDayOfWeek = 0;
         }
 
-        int tempNum;
-        System.out.println("Today date is " + currentMinute[2] + " num = " + numDayOfWeek);
+        System.out.println("Today date is " + today + " num = " + numDayOfWeek);
 
-        if (Integer.parseInt(currentMinute[0]) < 50) {
-            tempNum = Integer.parseInt(currentMinute[0] + 10);
-            System.out.println("Current minute " + currentMinute[0]);
-        } else {
-            tempNum = Integer.parseInt(currentMinute[0]);
+        if (minute < 50) {
+            minute = minute + 10;
+            System.out.println("Current minute " + minute);
         }
 
-        if ((tempNum > 50) && (tempNum < 59)) {
+        if ((minute > 50) && (minute < 59)) {
             System.out.println("between 50-59");
             for (int j = 0; j < timeTable.size(); j++) {
                 String[] startHour = timeTable.get(j).getStartTime().split(":");
                 int nextClassCheck = (Integer.parseInt(startHour[0]) - 1);//get the time of the next class
-                System.out.println("second for");
+                System.out.println(nextClassCheck);
                 //checks if there are classes that match the time and are on today
-                if ((Integer.parseInt(currentMinute[1]) == nextClassCheck)
+                if ((currentHour == nextClassCheck)
                         && (numDayOfWeek == timeTable.get(j).getDay())) {
                     te = timeTable.get(j);
                     titleString = "You're next class is in room " + te.getRoomName();
                     System.out.println("Class Found");
+                    classFound = true;
                 }
                 //if the class is at 1 and the current time is 12
-                else if ((Integer.parseInt(currentMinute[1]) == 12) && (nextClassCheck == 1)
+                else if ((currentHour == 12) && (nextClassCheck == 0)
                         && (numDayOfWeek == timeTable.get(j).getDay())) {
                     te = timeTable.get(j);
                     titleString = "You're next class is in room " + te.getRoomName();
@@ -275,14 +339,15 @@ public class HomePage extends ActionBarActivity {
                     roomPosition = x;
                 }
             }
-
+            boolean networkCheck = isNetworkAvailable();
             String url = "http://www.google.ie/maps/dir/";
             url += currentLatitude + "," + currentLongitude + "/";
             url += roomList.get(roomPosition).getGpsLatitude() + "+" + roomList.get(roomPosition).getGpsLongitude() + "/";
             Uri uri = Uri.parse(url);//makes URL
 
             Intent maps = new Intent(Intent.ACTION_VIEW, uri);
-            if (roomList.get(roomPosition).getGpsLongitude() != 0) {
+
+            if (roomList.get(roomPosition).getGpsLongitude() != 0 && networkCheck) {
                 PendingIntent pi = PendingIntent.getActivities(this, 0, new Intent[]{maps}, PendingIntent.FLAG_UPDATE_CURRENT);
                 notification.setContentIntent(pi);
             }

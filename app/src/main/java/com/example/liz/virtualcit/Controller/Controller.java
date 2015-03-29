@@ -11,7 +11,12 @@ import com.example.liz.virtualcit.Model.LectureRoom;
 import com.example.liz.virtualcit.Model.MenuObject;
 import com.example.liz.virtualcit.Model.TableEntry;
 import com.example.liz.virtualcit.MySQLLiteHelper;
+import com.example.liz.virtualcit.R;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -54,7 +59,7 @@ public class Controller {
         menuArray.add(mo);
         mo = new MenuObject("Students Union", "http://http://www.citsu.ie");
         menuArray.add(mo);
-        mo = new MenuObject("Student Handbook", "https://docs.google.com/gview?url=http://www.mycit.ie/contentFiles/PDF/CIT-Sports.pdf");
+        mo = new MenuObject("Student Handbook", "https://docs.google.com/gview?url=http://www.mycit.ie/contentFiles/PDF/CITStudentServicesGuide14%20u.pdf");
         menuArray.add(mo);
         mo = new MenuObject("College Map", "http://www.mycit.ie/images/cit-map.jpg");
         menuArray.add(mo);
@@ -105,23 +110,47 @@ public class Controller {
             Class.forName("com.mysql.jdbc.Driver");
             System.out.println("Driver Registered!");
             Connection con = DriverManager.getConnection(url, "9bd57b_citinfo", "group5ftw");
-            System.out.println("Database connection success");
+            if (con != null) {
+                System.out.println("Database connection success");
 
-            String result = "Database connection success\n";
-            Statement st = con.createStatement();
-            ResultSet rsSelect = st.executeQuery("select * from db_9bd57b_citinfo.roomInfo order by roomName asc");
-            ResultSetMetaData rsmd = rsSelect.getMetaData();
+                String result = "Database connection success\n";
+                Statement st = con.createStatement();
+                ResultSet rsSelect = st.executeQuery("select * from db_9bd57b_citinfo.roomInfo order by roomName asc");
+                ResultSetMetaData rsmd = rsSelect.getMetaData();
 
-            while (rsSelect.next()) {
-                String insertRooms = "INSERT INTO " + MySQLLiteHelper.ROOMTABLENAME
-                        + "(" + MySQLLiteHelper.ROOMSNAME + ","
-                        + MySQLLiteHelper.LATITUDE + ","
-                        + MySQLLiteHelper.LONGITUDE
-                        + ") VALUES(" + "'"
-                        + rsSelect.getString(1) + "'" + ","
-                        + rsSelect.getString(2) + ","
-                        + rsSelect.getString(3) + ");";
-                sqldb.execSQL(insertRooms);
+                while (rsSelect.next()) {
+                    String insertRooms = "INSERT INTO " + MySQLLiteHelper.ROOMTABLENAME
+                            + "(" + MySQLLiteHelper.ROOMSNAME + ","
+                            + MySQLLiteHelper.LATITUDE + ","
+                            + MySQLLiteHelper.LONGITUDE
+                            + ") VALUES(" + "'"
+                            + rsSelect.getString(1) + "'" + ","
+                            + rsSelect.getString(2) + ","
+                            + rsSelect.getString(3) + ");";
+                    sqldb.execSQL(insertRooms);
+                }
+            } else {
+                InputStream inputStream = homePage.getResources().openRawResource(R.raw.roominfo);
+                try {
+                    InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                    BufferedReader br = new BufferedReader(inputStreamReader);
+                    String currentLine;
+                    while ((currentLine = br.readLine()) != null) {
+                        String[] split = currentLine.split("#");
+                        String insertRoom = "INSERT INTO " + MySQLLiteHelper.ROOMTABLENAME
+                                + "(" + MySQLLiteHelper.ROOMSNAME + ","
+                                + MySQLLiteHelper.LATITUDE + ","
+                                + MySQLLiteHelper.LONGITUDE
+                                + ") VALUES(" + "'"
+                                + split[0] + "'" + ","
+                                + split[1] + ","
+                                + split[2] + ");";
+                        sqldb.execSQL(insertRoom);
+                    }
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -176,18 +205,25 @@ public class Controller {
 
     public ArrayList<LectureRoom> getAllRooms() {
         ArrayList<LectureRoom> roomList = new ArrayList<LectureRoom>();
-        sqldb = dbHelper.getReadableDatabase();
-        Cursor cursor = sqldb.query(MySQLLiteHelper.ROOMTABLENAME,
-                roomTableAllColumns, null, null, null, null, null);
+        try {
+            sqldb = dbHelper.getReadableDatabase();
+            Cursor cursor = sqldb.query(MySQLLiteHelper.ROOMTABLENAME,
+                    roomTableAllColumns, null, null, null, null, null);
 
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            LectureRoom lr = cursorToRoomEntry(cursor);
-            roomList.add(lr);
-            cursor.moveToNext();
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                LectureRoom lr = cursorToRoomEntry(cursor);
+                roomList.add(lr);
+                cursor.moveToNext();
+            }
+            cursor.close();
+            sqldb.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        cursor.close();
-        sqldb.close();
+
+
         return roomList;
     }
 

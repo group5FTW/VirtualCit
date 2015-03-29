@@ -40,6 +40,7 @@ public class Login extends ActionBarActivity {
         i.putExtra("course", course);
         i.putExtra("semester", semester);
         setResult(RESULT_OK, i);
+        finish();
     }
 
     public void userAlert()//alert method

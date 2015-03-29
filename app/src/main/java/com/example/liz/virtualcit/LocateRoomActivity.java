@@ -31,6 +31,24 @@ public class LocateRoomActivity extends HomePage {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.locate_room_activity);
         listView = (ListView) findViewById(R.id.listView2);
+        roomList = Controller.getInstance().getAllRooms();
+        if (roomList.isEmpty()) {
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+            alert.setTitle("No rooms!");
+            alert.setMessage("Retrieving list of rooms from server failed due to connection error." +
+                    "Please log out and log back when a connection is available");
+
+            alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    finish();
+                    dialogInterface.dismiss();
+                }
+            });
+
+            alert.show();
+        }
+
         LocationListener locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
                 // Called when a new location is found by the network location provider.
@@ -54,7 +72,6 @@ public class LocateRoomActivity extends HomePage {
 
         };
 
-        roomList = Controller.getInstance().getAllRooms();
         try {
             ArrayAdapter<LectureRoom> roomArrayAdapter;
             roomArrayAdapter = new ArrayAdapter<LectureRoom>(this, android.R.layout.simple_list_item_1, roomList);
@@ -85,7 +102,6 @@ public class LocateRoomActivity extends HomePage {
 
     public void goButtonClick(String roomChoice) {
 
-
         LectureRoom lr = new LectureRoom();
         for (int i = 0; i < roomList.size(); i++) {
             if (roomList.get(i).getRoomName().equals(roomChoice)) {
@@ -95,7 +111,7 @@ public class LocateRoomActivity extends HomePage {
         if (lr.getGpsLongitude() == 0) {
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-            alert.setTitle("Location No Available");
+            alert.setTitle("Location Not Available");
             alert.setMessage("This version does not contain location for this room. Please choose another");
 
             alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
@@ -106,22 +122,40 @@ public class LocateRoomActivity extends HomePage {
 
             alert.show();
         } else {
-            LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-            Criteria crit = new Criteria();
-            crit.setAccuracy(Criteria.ACCURACY_COARSE);
-            String provider = lm.getBestProvider(crit, true);
-            Location loc = lm.getLastKnownLocation(provider);
+            boolean network = isNetworkAvailable();
+            if (network == false) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-            String currentLongitude = String.valueOf(loc.getLongitude());
-            String currentLatitude = String.valueOf(loc.getLatitude());
+                alert.setTitle("No connection!");
+                alert.setMessage("Navigation cannot be displayed as there is no network connection." +
+                        "Please turn on WiFi or mobile data to use navigation.");
 
-            String url = "http://www.google.ie/maps/dir/";
-            url += currentLatitude + "," + currentLongitude + "/";
-            url += lr.getGpsLongitude() + "+" + lr.getGpsLatitude() + "/";
-            Uri uri = Uri.parse(url);//makes URL
+                alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
 
-            Intent map = new Intent(Intent.ACTION_VIEW, uri);
-            startActivity(map);
+                alert.show();
+            } else {
+                LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+                Criteria crit = new Criteria();
+                crit.setAccuracy(Criteria.ACCURACY_COARSE);
+                String provider = lm.getBestProvider(crit, true);
+                Location loc = lm.getLastKnownLocation(provider);
+
+                String currentLongitude = String.valueOf(loc.getLongitude());
+                String currentLatitude = String.valueOf(loc.getLatitude());
+
+                String url = "http://www.google.ie/maps/dir/";
+                url += currentLatitude + "," + currentLongitude + "/";
+                url += lr.getGpsLongitude() + "+" + lr.getGpsLatitude() + "/";
+                Uri uri = Uri.parse(url);//makes URL
+
+                Intent map = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(map);
+            }
+
         }
 
     }
